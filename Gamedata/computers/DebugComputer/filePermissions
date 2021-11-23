@@ -1,0 +1,12 @@
+default: rw-/rw-/r--
+/root: rwx/rwx/r--
+/home: rw-/rw-/r--
+/lib: rwx/rwx/rwx
+/cmds: r-x/r-x/r-x
+/cmds/ls.lua: r-x/r-x/r-x
+/cmds/chmod.lua: r-x/r-x/r-x
+/cmds/edit.lua: r-x/r-x/r-x
+/cmds/mkdir.lua: r-x/r-x/r-x
+/cmds/cd.lua: r-x/r-x/r-x
+/cmds/echo.lua: r-x/r-x/r-x
+/cmds/clear.lua: r-x/r-x/r-x

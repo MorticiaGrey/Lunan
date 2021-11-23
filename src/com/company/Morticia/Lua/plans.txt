@@ -1,0 +1,15 @@
+Planned Function List -
+  - getCurrPath(): gets path of file being executed
+  - makeFile(String path): Creates file at specified path, if it doesn't already exist. returns true/false if successful
+  - readFile(String path): Reads contents of file at path if it can. returns true/false if successful
+  - writeFile(String path, String contents): Writes contents to file at path, creates new file if none exists returns true/false if successful
+  - makeFolder(String path): Creates folder at specified path if does not already exist. returns true/false if successful
+  - getFolderChildren(String path): returns the names of all the children in a folder, returns nothing if folder does not exist
+  - write(String output): writes text to console without newline
+  - read(): reads next input from console
+  - read(String option): reads input from console but will filter depending on option
+  - read(int lower, int upper): reads input from console but only returns the characters from the specified bounds
+  - time(): look into just implementing the os.time()/os.date() functions but in this library
+  - execute(String cmd): Executes same way as command, looks for files in path then local folder if not objective path. If
+  objective path (i.e. /home/bunny_boi/commands/test.lu) goes right to that file. Anything after file to execute is arg,
+  separated by spaces in string cmd

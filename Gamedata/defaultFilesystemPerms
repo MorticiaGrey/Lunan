@@ -1,0 +1,4 @@
+default: rw-/rw-/r--
+/cmds: r-x/r-x/r-x
+/root: rwx/rwx/---
+/lib: rwx/rwx/rwx
