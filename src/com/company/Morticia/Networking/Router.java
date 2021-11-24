@@ -16,15 +16,19 @@ public class Router {
     }
 
     public boolean sendPacket(String dst, NetworkAddress src, String protocol, List<String> data) {
+        if (dst.equals("localhost")) {
+            src.listener.networkEventTriggered(new NetworkEvent(protocol, src, src, protocol, data));
+            return true;
+        }
         for (NetworkListener i : children) {
             if (i.getAddress().address.equals(dst)) {
-                i.networkEventTriggered(new NetworkEvent("newPacket", src, i.getAddress(), protocol, data));
+                i.networkEventTriggered(new NetworkEvent(protocol, src, i.getAddress(), protocol, data));
                 return true;
             }
         }
         NetworkListener i = NetworkRegistry.getListener(dst);
         if (i != null) {
-            i.networkEventTriggered(new NetworkEvent("newPacket", src, i.getAddress(), protocol, data));
+            i.networkEventTriggered(new NetworkEvent(protocol, src, i.getAddress(), protocol, data));
             return true;
         }
         return false;

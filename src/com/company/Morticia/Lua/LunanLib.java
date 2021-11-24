@@ -7,13 +7,12 @@ import com.company.Morticia.Computer.Filesystem.Folder;
 import com.company.Morticia.Computer.Filesystem.L_File;
 import com.company.Morticia.Computer.User.User;
 import com.company.Morticia.Computer.User.UserGroup;
+import com.company.Morticia.Events.Event;
 import com.company.Morticia.UI.GUI.FileEditor.FileEditorFrame;
 import com.company.Morticia.UI.GUI.Terminal.TerminalIO;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
-import org.luaj.vm2.lib.OneArgFunction;
-import org.luaj.vm2.lib.TwoArgFunction;
-import org.luaj.vm2.lib.ZeroArgFunction;
+import org.luaj.vm2.lib.*;
 
 import java.util.*;
 
@@ -60,6 +59,7 @@ public class LunanLib extends TwoArgFunction {
         library.set("writeFile", new writeFile(this.computer));
         library.set("readFile", new readFile(this.computer));
         library.set("writeFolder", new writeFolder(this.computer));
+        library.set("removeChild", new removeChild(this.computer));
         library.set("getFolderChildren", new getFolderChildren(this.computer));
         library.set("getFolderChildrenLong", new getFolderChildrenLong(this.computer));
         library.set("execute", new execute(this.computer));
@@ -77,6 +77,8 @@ public class LunanLib extends TwoArgFunction {
         library.set("getFileGroup", new getFileGroup(this.computer));
         library.set("setFileGroup", new setFileGroup(this.computer));
         library.set("openFileEditor", new openFileEditor(this.computer));
+        library.set("triggerEvent", new triggerEvent(this.computer));
+        library.set("sendPacket", new sendPacket(this.computer));
         env.set("lunan", library);
         return library;
     }
@@ -253,8 +255,21 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue luaValue) {
-            this.computer.filesystem.writeFolder(luaValue.checkjstring());
-            return null;
+            return LuaValue.valueOf(computer.filesystem.writeFolder(luaValue.checkjstring()) == null);
+        }
+    }
+
+    // Removes a file or folder at path specified
+    static class removeChild extends OneArgFunction {
+        public Computer computer;
+
+        public removeChild(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue path) {
+            return LuaValue.valueOf(computer.filesystem.deleteChild(path.checkjstring()));
         }
     }
 
@@ -737,6 +752,62 @@ public class LunanLib extends TwoArgFunction {
             } else {
                 return LuaValue.valueOf(false);
             }
+        }
+    }
+
+    static class triggerEvent extends OneArgFunction {
+        public Computer computer;
+
+        public triggerEvent(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue eventName) {
+            computer.eventTriggered(new Event(eventName.tojstring()));
+            return null;
+        }
+    }
+
+    static class sendPacket extends ThreeArgFunction {
+        public Computer computer;
+
+        public sendPacket(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue protocol, LuaValue dst, LuaValue data) {
+            try {
+                List<String> buffer = new ArrayList<>();
+                if (data.istable() && data.checktable().length() > 0) {
+                    LuaTable table = data.checktable();
+                    for (int i = 1; i <= table.length(); i++) { // send ping localhost test test
+                        if (!table.get(LuaValue.valueOf(i)).isnil()) {
+                            buffer.add(table.get(LuaValue.valueOf(i)).checkjstring());
+                        }
+                    }
+                }
+                return LuaValue.valueOf(computer.router.sendPacket(dst.checkjstring(), computer.address, protocol.checkjstring(), buffer));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    static class countTable extends OneArgFunction {
+        @Override
+        public LuaValue call(LuaValue table) {
+            try {
+                if (!table.istable()) {
+                    return LuaValue.valueOf(0);
+                }
+                return LuaValue.valueOf(table.length());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
         }
     }
 }

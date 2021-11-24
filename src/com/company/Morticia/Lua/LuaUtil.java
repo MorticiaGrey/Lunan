@@ -50,6 +50,8 @@ public class LuaUtil {
         userGlobals.set("htmlSpace", LuaValue.valueOf(Constants.htmlSpace));
         userGlobals.set("htmlTab", LuaValue.valueOf(Constants.htmlSpace + Constants.htmlSpace + Constants.htmlSpace + Constants.htmlSpace));
 
+        userGlobals.set("tableLength", new LunanLib.countTable());
+
         LoadState.install(userGlobals);
         LuaC.install(userGlobals);
 

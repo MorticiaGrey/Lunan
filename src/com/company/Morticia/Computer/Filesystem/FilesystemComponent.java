@@ -93,6 +93,10 @@ public class FilesystemComponent {
         return TerminalIO.wrapInColor(cName, "FFFFFF");
     }
 
+    public void delete() {
+        parent.remove(cName);
+    }
+
     public void save() {
 
     }

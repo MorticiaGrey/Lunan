@@ -15,7 +15,7 @@ public class Event {
 
     public Event(String eventName) {
         this.eventName = eventName;
-        this.scriptPath = "/events" + eventName;
+        this.scriptPath = "/events/" + eventName + ".lua";
     }
 
     public void triggerLuaScript(Computer computer) {

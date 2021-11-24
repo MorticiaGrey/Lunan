@@ -247,6 +247,16 @@ public class Filesystem {
         return folder;
     }
 
+    public boolean deleteChild(String path) {
+        FilesystemComponent child = getChild(path);
+        if (child == null) {
+            return false;
+        } else {
+            child.delete();
+            return true;
+        }
+    }
+
     /**
      * Saves filesystem to disc
      */

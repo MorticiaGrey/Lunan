@@ -16,15 +16,17 @@ public class ProcessedText {
         this.original = in;
         this.args = new ArrayList<>();
         this.flags = new ArrayList<>();
-        String[] buffer = in.split(" ");
-        this.command = buffer[0];
+        List<String> buffer = new ArrayList<>(List.of(in.split(" ")));
+        this.command = buffer.get(0);
 
-        if (buffer.length > 1) {
-            for (int i = 1; i < buffer.length; i++) {
-                if (!buffer[i].startsWith("-")) {
-                    this.args.add(buffer[i]);
+        buffer.remove(0);
+
+        if (buffer.size() > 1) {
+            for (String i : buffer) {
+                if (i.startsWith("-")) {
+                    this.flags.add(i);
                 } else {
-                    this.flags.add(buffer[i]);
+                    this.args.add(i);
                 }
             }
         }
@@ -33,7 +35,7 @@ public class ProcessedText {
     public LuaTable argsToLuaTable() {
         LuaTable table = LuaValue.tableOf();
         for (String i : this.args) {
-            table.insert(table.length(), LuaValue.valueOf(i));
+            table.insert(0, LuaValue.valueOf(i));
         }
         return table;
     }

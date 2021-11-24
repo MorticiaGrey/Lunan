@@ -7,6 +7,8 @@ import com.company.Morticia.Computer.Filesystem.Filesystem;
 import com.company.Morticia.Computer.Filesystem.Folder;
 import com.company.Morticia.Computer.User.User;
 import com.company.Morticia.Computer.User.UserGroup;
+import com.company.Morticia.Events.Event;
+import com.company.Morticia.Events.LunanEventListener;
 import com.company.Morticia.Networking.NetworkAddress;
 import com.company.Morticia.Networking.NetworkEvent;
 import com.company.Morticia.Networking.NetworkListener;
@@ -18,7 +20,7 @@ import com.company.Morticia.Util.DiscUtils.DiscUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Computer implements NetworkListener {
+public class Computer implements NetworkListener, LunanEventListener {
     public static int numOfComputers = 0;
 
     public ComputerConfig config;
@@ -115,6 +117,11 @@ public class Computer implements NetworkListener {
 
     @Override
     public void networkEventTriggered(NetworkEvent event) {
+        event.triggerLuaScript(this);
+    }
+
+    @Override
+    public void eventTriggered(Event event) {
         event.triggerLuaScript(this);
     }
 }
