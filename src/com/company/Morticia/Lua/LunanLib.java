@@ -33,6 +33,10 @@ Planned Function List -
   - execute(String cmd): Executes same way as command, looks for files in path then local folder if not objective path. If
   objective path (i.e. /home/bunny_boi/commands/test.lu) goes right to that file. Anything after file to execute is arg,
   separated by spaces in string cmd
+  - consider adding way for player to add globals that other scripts are able to access, work would have to be done
+  to insure they aren't overriding A) globals I set it in place and B) without perms to
+  - consider graphical interface, maybe in separate labeled library, that interprets html and displays it.
+  Input would have to be handled differently, probably it would trigger events.
  */
 
 public class LunanLib extends TwoArgFunction {
@@ -72,7 +76,13 @@ public class LunanLib extends TwoArgFunction {
         library.set("removeUser", new removeUser(this.computer));
         library.set("addUserGroup", new addUserGroup(this.computer));
         library.set("removeUserGroup", new removeUserGroup(this.computer));
+        library.set("setPrimaryUserGroup", new setPrimaryUserGroup(this.computer));
+        library.set("userExists", new userExists(this.computer));
         library.set("getUsers", new getUsers(this.computer));
+        library.set("getGroups", new getGroups(this.computer));
+        library.set("removeGroup", new removeGroup(this.computer));
+        library.set("addGroup", new addGroup(this.computer));
+        library.set("getCurrUser", new getCurrUser(this.computer));
         library.set("setCurrUser", new setCurrUser(this.computer));
         library.set("getFileGroup", new getFileGroup(this.computer));
         library.set("setFileGroup", new setFileGroup(this.computer));
@@ -291,11 +301,15 @@ public class LunanLib extends TwoArgFunction {
 
             if (color.checkboolean()) {
                 for (FilesystemComponent i : children) {
-                    lua_children.insert(lua_children.length(), LuaValue.valueOf(i.getHTMLName()));
+                    if (i.canRead(computer.currUser)) {
+                        lua_children.insert(lua_children.length(), LuaValue.valueOf(i.getHTMLName()));
+                    }
                 }
             } else {
                 for (FilesystemComponent i : children) {
-                    lua_children.insert(lua_children.length(), LuaValue.valueOf(i.cName));
+                    if (i.canRead(computer.currUser)) {
+                        lua_children.insert(lua_children.length(), LuaValue.valueOf(i.cName));
+                    }
                 }
             }
 
@@ -321,13 +335,17 @@ public class LunanLib extends TwoArgFunction {
 
             if (color.checkboolean()) {
                 for (FilesystemComponent i : children) {
-                    lua_children.insert(lua_children.length(), LuaValue.valueOf(i.type + i.perms.permsString
-                            + " " + i.owner.uName + " " + i.group.groupName + " " + i.getHTMLName()));
+                    if (i.canRead(computer.currUser)) {
+                        lua_children.insert(lua_children.length(), LuaValue.valueOf(i.type + i.perms.permsString
+                                + " " + i.owner.uName + " " + i.group.groupName + " " + i.getHTMLName()));
+                    }
                 }
             } else {
                 for (FilesystemComponent i : children) {
-                    lua_children.insert(lua_children.length(), LuaValue.valueOf(i.type + i.perms.permsString
-                            + " " + i.owner.uName + " " + i.group.groupName + " " + i.cName));
+                    if (i.canRead(computer.currUser)) {
+                        lua_children.insert(lua_children.length(), LuaValue.valueOf(i.type + i.perms.permsString
+                                + " " + i.owner.uName + " " + i.group.groupName + " " + i.cName));
+                    }
                 }
             }
 
@@ -552,10 +570,10 @@ public class LunanLib extends TwoArgFunction {
         public LuaValue call(LuaValue userName, LuaValue password) {
             User currUser = computer.currUser;
             if (!currUser.equals(computer.rootUser)) {
-                return null;
+                return LuaValue.valueOf(false);
             }
             computer.allUsers.get(userName.checkjstring()).password = password.checkjstring();
-            return null;
+            return LuaValue.valueOf(true);
         }
     }
 
@@ -570,10 +588,10 @@ public class LunanLib extends TwoArgFunction {
         public LuaValue call(LuaValue currName, LuaValue newName) {
             User currUser = computer.currUser;
             if (!currUser.equals(computer.rootUser)) {
-                return null;
+                return LuaValue.valueOf(false);
             }
             computer.allUsers.get(currName.checkjstring()).uName = newName.checkjstring();
-            return null;
+            return LuaValue.valueOf(true);
         }
     }
 
@@ -612,16 +630,17 @@ public class LunanLib extends TwoArgFunction {
         public LuaValue call(LuaValue userName, LuaValue groupName) {
             User currUser = computer.currUser;
             if (!currUser.equals(computer.rootUser) || computer.allUsers.get(userName.checkjstring()) == null) {
-                return null;
+                return LuaValue.valueOf(false);
             }
             User user = computer.allUsers.get(userName.checkjstring());
             for (UserGroup i : computer.groups) {
                 if (i.groupName.equals(groupName.checkjstring())) {
                     i.add(user);
                     user.groups.add(i);
+                    return LuaValue.valueOf(true);
                 }
             }
-            return null;
+            return LuaValue.valueOf(false);
         }
     }
 
@@ -636,16 +655,59 @@ public class LunanLib extends TwoArgFunction {
         public LuaValue call(LuaValue userName, LuaValue groupName) {
             User currUser = computer.currUser;
             if (!currUser.equals(computer.rootUser) || computer.allUsers.get(userName.checkjstring()) == null) {
-                return null;
+                return LuaValue.valueOf(false);
             }
             User user = computer.allUsers.get(userName.checkjstring());
             for (UserGroup i : computer.groups) {
                 if (i.groupName.equals(groupName.checkjstring())) {
                     i.remove(userName.checkjstring());
                     user.groups.remove(i);
+                    return LuaValue.valueOf(true);
                 }
             }
-            return null;
+            return LuaValue.valueOf(false);
+        }
+    }
+
+    static class setPrimaryUserGroup extends TwoArgFunction {
+        public Computer computer;
+
+        public setPrimaryUserGroup(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue userName, LuaValue newGroup) {
+            User currUser = computer.currUser;
+            if (!currUser.equals(computer.rootUser) || computer.allUsers.get(userName.checkjstring()) == null) {
+                return LuaValue.valueOf(false);
+            }
+            User user = computer.allUsers.get(userName.checkjstring());
+            UserGroup group = null;
+            for (UserGroup i : computer.groups) {
+                if (i.groupName.equals(newGroup.checkjstring())) {
+                    group = i;
+                    break;
+                }
+            }
+            if (user == null || group == null) {
+                return LuaValue.valueOf(false);
+            }
+            user.group = group;
+            return LuaValue.valueOf(true);
+        }
+    }
+
+    static class userExists extends OneArgFunction {
+        public Computer computer;
+
+        public userExists(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue userName) {
+            return LuaValue.valueOf(computer.allUsers.get(userName.checkjstring()) != null);
         }
     }
 
@@ -666,6 +728,85 @@ public class LunanLib extends TwoArgFunction {
             }
 
             return table;
+        }
+    }
+
+    // gets groups specified user belongs to
+    static class getGroups extends OneArgFunction {
+        public Computer computer;
+
+        public getGroups(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue userName) {
+            LuaTable table = LuaValue.tableOf();
+            User user = computer.allUsers.get(userName.checkjstring());
+            if (user == null) {
+                return null;
+            }
+            List<UserGroup> groups = user.groups;
+
+            for (UserGroup i : groups) {
+                table.insert(table.length(), LuaValue.valueOf(i.groupName));
+            }
+
+            return table;
+        }
+    }
+
+    static class removeGroup extends OneArgFunction {
+        public Computer computer;
+
+        public removeGroup(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue groupName) {
+            User currUser = computer.currUser;
+            if (!currUser.equals(computer.rootUser)) {
+                return LuaValue.valueOf(false);
+            }
+            for (UserGroup i : computer.groups) {
+                if (i.groupName.equals(groupName.checkjstring())) {
+                    computer.groups.remove(i);
+                    return LuaValue.valueOf(true);
+                }
+            }
+            return LuaValue.valueOf(false);
+        }
+    }
+
+    static class addGroup extends OneArgFunction {
+        public Computer computer;
+
+        public addGroup(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue groupName) {
+            User currUser = computer.currUser;
+            if (!currUser.equals(computer.rootUser)) {
+                return LuaValue.valueOf(false);
+            }
+            computer.groups.add(new UserGroup(groupName.checkjstring(), computer));
+            return LuaValue.valueOf(true);
+        }
+    }
+
+    static class getCurrUser extends ZeroArgFunction {
+        public Computer computer;
+
+        public getCurrUser(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call() {
+            return LuaValue.valueOf(computer.currUser.uName);
         }
     }
 
@@ -778,21 +919,16 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue protocol, LuaValue dst, LuaValue data) {
-            try {
-                List<String> buffer = new ArrayList<>();
-                if (data.istable() && data.checktable().length() > 0) {
-                    LuaTable table = data.checktable();
-                    for (int i = 1; i <= table.length(); i++) { // send ping localhost test test
-                        if (!table.get(LuaValue.valueOf(i)).isnil()) {
-                            buffer.add(table.get(LuaValue.valueOf(i)).checkjstring());
-                        }
+            List<String> buffer = new ArrayList<>();
+            if (data.istable() && data.checktable().length() > 0) {
+                LuaTable table = data.checktable();
+                for (int i = 1; i <= table.length(); i++) { // send ping localhost test test
+                    if (!table.get(LuaValue.valueOf(i)).isnil()) {
+                        buffer.add(table.get(LuaValue.valueOf(i)).checkjstring());
                     }
                 }
-                return LuaValue.valueOf(computer.router.sendPacket(dst.checkjstring(), computer.address, protocol.checkjstring(), buffer));
-            } catch (Exception e) {
-                e.printStackTrace();
             }
-            return null;
+            return LuaValue.valueOf(computer.router.sendPacket(dst.checkjstring(), computer.address, protocol.checkjstring(), buffer));
         }
     }
 

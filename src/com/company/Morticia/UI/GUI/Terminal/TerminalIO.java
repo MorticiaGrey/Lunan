@@ -1,11 +1,14 @@
 package com.company.Morticia.UI.GUI.Terminal;
 
+import com.company.Morticia.UI.GUI.MainFrame;
+
 import javax.swing.*;
 import java.util.ArrayList;
 
 public class TerminalIO {
     private static final int cmpn = 0; // Component number, codes for output
     protected static ArrayList<String> input = new ArrayList<>(); // TerminalGUI will dump input here
+    protected static volatile boolean inputAdded = false;
     public static String terminalPrefix = "<html>"; // Copy of the data in prefix display
 
     /**
@@ -41,15 +44,16 @@ public class TerminalIO {
 
     public static synchronized String nextLine(String in) {
         TerminalGUI.inputRequested = true;
-        String prefix = TerminalGUI.prefixDisplay.getText();
         TerminalGUI.prefixDisplay.setText(in);
-        while (input.size() < 1) {
-            SwingUtilities.updateComponentTreeUI(TerminalGUI.userInputPanel);
+        while (!inputAdded) {
+            Thread.onSpinWait();
+            //SwingUtilities.updateComponentTreeUI(TerminalGUI.userInputPanel);
+            //SwingUtilities.updateComponentTreeUI(TerminalGUI.centerPanel);
         }
+        inputAdded = false;
         TerminalGUI.inputRequested = false;
         String buffer = input.get(0);
         input.remove(0);
-        TerminalGUI.prefixDisplay.setText(prefix);
         return buffer;
     }
 

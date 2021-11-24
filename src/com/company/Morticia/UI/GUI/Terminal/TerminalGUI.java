@@ -63,6 +63,7 @@ public class TerminalGUI implements MouseWheelListener, KeyListener {
                 if (!inputField.getText().isBlank()) {
                     if (inputRequested) {
                         TerminalIO.input.add(inputField.getText());
+                        TerminalIO.inputAdded = true;
                     } else {
                         Gamedata.handleInput(inputField.getText());
                     }

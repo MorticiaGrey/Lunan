@@ -8,5 +8,6 @@ if length >= 3 then
         print(args[1] .. ": no such address")
     end
 else
-    print("usage: send [DESTINATION] [PROTOCOL] [DATA...]")
+    -- Might switch the order on this, idk, text me if you hate it
+    print("usage: send [PROTOCOL] [DESTINATION] [DATA...]")
 end

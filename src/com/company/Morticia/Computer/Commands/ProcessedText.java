@@ -21,13 +21,11 @@ public class ProcessedText {
 
         buffer.remove(0);
 
-        if (buffer.size() > 1) {
-            for (String i : buffer) {
-                if (i.startsWith("-")) {
-                    this.flags.add(i);
-                } else {
-                    this.args.add(i);
-                }
+        for (String i : buffer) {
+            if (i.startsWith("-")) {
+                this.flags.add(i);
+            } else {
+                this.args.add(i);
             }
         }
     }
@@ -43,7 +41,7 @@ public class ProcessedText {
     public LuaTable flagsToLuaTable() {
         LuaTable table = LuaValue.tableOf();
         for (String i : this.flags) {
-            table.insert(table.length(), LuaValue.valueOf(i));
+            table.insert(0, LuaValue.valueOf(i));
         }
         return table;
     }

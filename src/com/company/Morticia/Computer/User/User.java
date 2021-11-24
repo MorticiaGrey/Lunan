@@ -19,6 +19,7 @@ public class User {
         this.group = new UserGroup(uName, parent);
         this.groups = new ArrayList<>();
 
+        this.groups.add(parent.allUsers);
         this.groups.add(this.group);
         this.group.add(this);
 

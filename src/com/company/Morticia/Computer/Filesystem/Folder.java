@@ -25,6 +25,9 @@ public class Folder extends FilesystemComponent {
         this.fileChildren = new ArrayList<>();
         this.children = new ArrayList<>();
         this.type = "d";
+        if (this.computer.filesystem != null) {
+            save();
+        }
     }
 
     /**
@@ -108,7 +111,7 @@ public class Folder extends FilesystemComponent {
 
     public List<String> childrenNames() {
         if (!this.canRead(this.computer.currUser)) {
-            return null;
+            return new ArrayList<>();
         }
         List<String> buffer = new ArrayList<>();
         for (FilesystemComponent i : this.children) {

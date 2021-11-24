@@ -27,6 +27,7 @@ public class L_File extends FilesystemComponent {
         if (parent.cName.equals("cmds") && parent.parent.isRoot) {
             computer.commands.add(new Command(this));
         }
+        save();
     }
 
     public L_File(Folder parent, String name, Computer computer, String[] content) {
@@ -39,6 +40,7 @@ public class L_File extends FilesystemComponent {
         if (parent.cName.equals("cmds") && parent.parent.isRoot) {
             computer.commands.add(new Command(this));
         }
+        save();
     }
 
     public L_File(Folder parent, String name, Computer computer, List<String> content) {
@@ -51,6 +53,7 @@ public class L_File extends FilesystemComponent {
         if (parent.cName.equals("cmds") && parent.parent.isRoot) {
             computer.commands.add(new Command(this));
         }
+        save();
     }
 
     public void setContents(List<String> newData) {
