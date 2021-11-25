@@ -67,6 +67,8 @@ public class LunanLib extends TwoArgFunction {
         library.set("readFile", new readFile(this.computer));
         library.set("writeFolder", new writeFolder(this.computer));
         library.set("removeChild", new removeChild(this.computer));
+        library.set("renameChild", new renameChild(this.computer));
+        library.set("moveChild", new moveChild(this.computer));
         library.set("getFolderChildren", new getFolderChildren(this.computer));
         library.set("getFolderChildrenLong", new getFolderChildrenLong(this.computer));
         library.set("execute", new execute(this.computer));
@@ -94,6 +96,7 @@ public class LunanLib extends TwoArgFunction {
         library.set("sendPacket", new sendPacket(this.computer));
         library.set("executeScript", new executeScript(this.computer));
         library.set("registerCommand", new registerCommand(this.computer));
+        library.set("setColor", new setColor());
         env.set("lunan", library);
         return library;
     }
@@ -326,6 +329,51 @@ public class LunanLib extends TwoArgFunction {
         @Override
         public LuaValue call(LuaValue path) {
             return LuaValue.valueOf(computer.filesystem.deleteChild(path.checkjstring()));
+        }
+    }
+
+    static class renameChild extends TwoArgFunction {
+        public Computer computer;
+
+        public renameChild(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue path, LuaValue newName) {
+            FilesystemComponent child = computer.filesystem.getChild(path.toString());
+            if (child == null) {
+                return LuaValue.valueOf(false);
+            }
+            child.cName = newName.checkjstring();
+            return LuaValue.valueOf(true);
+        }
+    }
+
+    static class moveChild extends TwoArgFunction {
+        public Computer computer;
+
+        public moveChild(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue path, LuaValue newFolder) {
+            if (path.checkjstring().equals("/")) {
+                return LuaValue.valueOf(false);
+            }
+            FilesystemComponent child = computer.filesystem.getChild(path.toString());
+            if (child == null) {
+                return LuaValue.valueOf(false);
+            }
+            Folder folder = computer.filesystem.getFolder(newFolder.checkjstring());
+            if (folder == null) {
+                return LuaValue.valueOf(false);
+            }
+            child.parent.remove(child.cName);
+            folder.add(child);
+            child.parent = folder;
+            return LuaValue.valueOf(true);
         }
     }
 
@@ -1047,6 +1095,13 @@ public class LunanLib extends TwoArgFunction {
                 e.printStackTrace();
             }
             return LuaValue.valueOf(false);
+        }
+    }
+
+    static class setColor extends TwoArgFunction {
+        @Override
+        public LuaValue call(LuaValue text, LuaValue hexValue) {
+            return LuaValue.valueOf(TerminalIO.wrapInColor(text.checkjstring(), hexValue.checkjstring()));
         }
     }
 }

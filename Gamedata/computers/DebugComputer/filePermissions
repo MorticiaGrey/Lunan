@@ -20,6 +20,7 @@ default: rw-/rw-/r--
 /cmds/users.lua: r-x/r-x/r-x
 /cmds/trigger.lua: r-x/r-x/r-x
 /cmds/echo.lua: r-x/r-x/r-x
+/cmds/mv.lua: r-x/r-x/r-x
 /cmds/passwd.lua: r-x/r-x/r-x
 /cmds/clear.lua: r-x/r-x/r-x
 /cmds/useradd.lua: r-x/r-x/r-x

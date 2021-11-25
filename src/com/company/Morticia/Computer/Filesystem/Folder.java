@@ -95,13 +95,13 @@ public class Folder extends FilesystemComponent {
         if (!this.canWrite(this.computer.currUser)) {
             return false;
         }
-        for (int i = 0; i < children.size(); i++) {
-            if (children.get(i).cName.equals(name)) {
+        for (FilesystemComponent i : children) {
+            if (i.cName.equals(name)) {
                 children.remove(i);
-                if (children.get(i) instanceof Folder) {
-                    folderChildren.remove((Folder) children.get(i));
-                } else if (children.get(i) instanceof L_File) {
-                    fileChildren.remove((L_File) children.get(i));
+                if (i instanceof Folder) {
+                    folderChildren.remove((Folder) i);
+                } else if (i instanceof L_File) {
+                    fileChildren.remove((L_File) i);
                 }
                 return true;
             }

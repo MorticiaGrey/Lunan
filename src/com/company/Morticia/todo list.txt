@@ -22,9 +22,12 @@
  - Save userspace configurations (groups, users, etc.) (Done)
  - Fix null pointer glitch in groups command (Done)
  - Make client class for network interactions between computers so they can log in to each other
- - Write NetworkObject class
- - Write Lua functions to interact with new network stuff
+ - Write NetworkObject class (Maybe do this eventually)
+ - Write Lua functions to interact with new network stuff (included in above item)
  - Write the default networking events
+ - Rename file/directory command (Done)
+ - Function to wrap text in color lua (Done)
+ - Advanced terminal stuff like piping input (All this terminal stuff will be the next update, for now I just want to finish)
  - (Very) Basic syntax highlighting for the text editor, make it toggleable
  - Write documentation/tutorials
  - Find way to allow puzzles to be made

@@ -93,7 +93,7 @@ public class Filesystem {
         String[] pathSegments = path.split("/");
         Folder folder = root;
         int i;
-        for (i = 0; i < pathSegments.length - 2; i++) {
+        for (i = 0; i < pathSegments.length - 1; i++) {
             String pathSegment = pathSegments[i];
             Folder child = folder.getFolder(pathSegment);
             if (child != null) {
