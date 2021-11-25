@@ -1,7 +1,7 @@
 default: rw-/rw-/r--
 /root: rwx/rwx/r--
 /home: rw-/rw-/r--
-/lib: rwx/rwx/-wx
+/lib: rwx/rwx/rwx
 /events: rw-/rw-/r--
 /cmds: r-x/r-x/r-x
 /home/test_user: rw-/rw-/r--
@@ -17,9 +17,12 @@ default: rw-/rw-/r--
 /cmds/mkdir.lua: r-x/r-x/r-x
 /cmds/cd.lua: r-x/r-x/r-x
 /cmds/groups.lua: r-x/r-x/r-x
+/cmds/execute.lua: r-x/r-x/r-x
 /cmds/users.lua: r-x/r-x/r-x
 /cmds/trigger.lua: r-x/r-x/r-x
 /cmds/echo.lua: r-x/r-x/r-x
 /cmds/passwd.lua: r-x/r-x/r-x
 /cmds/clear.lua: r-x/r-x/r-x
 /cmds/useradd.lua: r-x/r-x/r-x
+/cmds/regcommand.lua: r-x/r-x/r-x
+/cmds/cat.lua: r-x/r-x/r-x

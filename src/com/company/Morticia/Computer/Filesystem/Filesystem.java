@@ -6,7 +6,6 @@ import com.company.Morticia.Computer.User.PermissionsEncoder;
 import com.company.Morticia.Util.Constants;
 import com.company.Morticia.Util.DiscUtils.DiscUtils;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class Filesystem {
@@ -126,7 +125,11 @@ public class Filesystem {
                 return null;
             }
         }
-        return ((L_File)folder.getChild(pathSegments[pathSegments.length - 1])).content;
+        L_File file = folder.getFile(pathSegments[pathSegments.length - 1]);
+        if (file == null) {
+            return null;
+        }
+        return file.content;
     }
 
     /**

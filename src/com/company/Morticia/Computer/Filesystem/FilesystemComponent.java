@@ -54,7 +54,7 @@ public class FilesystemComponent {
     }
 
     public boolean canRead(User user) {
-        if (user.equals(this.computer.rootUser)) {
+        if (user.equals(this.computer.rootUser) || user.sudoEnabled) {
             return true;
         } else if (user.equals(this.owner)) {
             return this.perms.ownerRead;
@@ -66,7 +66,7 @@ public class FilesystemComponent {
     }
 
     public boolean canWrite(User user) {
-        if (user.equals(this.computer.rootUser)) {
+        if (user.equals(this.computer.rootUser) || user.sudoEnabled) {
             return true;
         } else if (user.equals(this.owner)) {
             return this.perms.ownerWrite;
@@ -78,7 +78,7 @@ public class FilesystemComponent {
     }
 
     public boolean canExecute(User user) {
-        if (user.equals(this.computer.rootUser)) {
+        if (user.equals(this.computer.rootUser) || user.sudoEnabled) {
             return true;
         } else if (user.equals(this.owner)) {
             return this.perms.ownerExecute;

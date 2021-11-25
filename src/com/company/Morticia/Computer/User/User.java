@@ -12,6 +12,7 @@ public class User {
     public Folder homeDir;
     public UserGroup group;
     public List<UserGroup> groups;
+    public boolean sudoEnabled;
 
     public User(String uName, String password, Computer parent) {
         this.uName = uName;
@@ -23,6 +24,8 @@ public class User {
         this.groups.add(this.group);
         this.group.add(this);
 
+        sudoEnabled = false;
+
         if (!this.uName.equals("root")) {
             String homeDirPath = "/home/" + uName;
             if (parent.filesystem.folderExists(homeDirPath)) {
@@ -31,6 +34,8 @@ public class User {
                 this.homeDir = parent.filesystem.writeFolder(homeDirPath);
             }
             this.homeDir.setUserPermissions("rw-/rw-/r--");
+        } else {
+            sudoEnabled = true;
         }
 
         parent.groups.add(group);

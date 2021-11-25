@@ -3,22 +3,29 @@
  - Update LunanLib to always return true/false in setters depending on success of operation
  (Done)
  - Rewrite filesystem commands to accommodate tables being returned (Done)
- - Write the userspace commands
- - Make it tell you when it doesn't recognize a command
- - Make usermod able to take multiple group args for -a -G
- - Make print() able to handle integers, tables, booleans
- - Add undo/redo functionality to terminal, make sure copy/paste works
- - Register command command
- - Execute script command
- - Have chmod mark files executable or not depending on new perms
- - Add sudo
+ - Write the userspace commands (Done)
+ - Make it tell you when it doesn't recognize a command (Done)
+ - Make usermod able to take multiple group args for -a -G (Done)
+ - Make print() able to handle integers, tables, booleans (Done)
+ - Add undo/redo functionality to terminal, make sure copy/paste works (Done)
+ - Register command command (Done)
+ - Cat command (Done)
+ - Save font size (Done)
+ - Command aliases (Still do this eventually but './' codes for 'execute')
+ - Execute script command (Done)
+ - Have chmod mark files executable or not depending on new perms (Done)
+ - Add sudo (Done)
+ - Redo login so it doesn't take password as argument but uses read() (Done)
+ - Fix font glitch where there's no text sometimes on startup
+ - Make files and folders unable to share name if have same parent (Done)
+ - Rename file/folder command/library function (???)
  - Save userspace configurations (groups, users, etc.)
- - Write the default networking events
- - Write documentation/tutorials
- - Find way to allow puzzles to be made
  - Make client class for network interactions between computers so they can log in to each other
  - Write NetworkObject class
+ - Write the default networking events
  - (Very) Basic syntax highlighting for the text editor, make it toggleable
+ - Write documentation/tutorials
+ - Find way to allow puzzles to be made
  - Make the puzzles
  - Be gay
  - Do crimes

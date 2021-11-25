@@ -1,5 +1,6 @@
 package com.company.Morticia.Lua;
 
+import com.company.Morticia.Computer.Commands.Command;
 import com.company.Morticia.Computer.Commands.ProcessedText;
 import com.company.Morticia.Computer.Computer;
 import com.company.Morticia.Computer.Filesystem.FilesystemComponent;
@@ -10,6 +11,7 @@ import com.company.Morticia.Computer.User.UserGroup;
 import com.company.Morticia.Events.Event;
 import com.company.Morticia.UI.GUI.FileEditor.FileEditorFrame;
 import com.company.Morticia.UI.GUI.Terminal.TerminalIO;
+import com.company.Morticia.Util.Constants;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.*;
@@ -89,6 +91,8 @@ public class LunanLib extends TwoArgFunction {
         library.set("openFileEditor", new openFileEditor(this.computer));
         library.set("triggerEvent", new triggerEvent(this.computer));
         library.set("sendPacket", new sendPacket(this.computer));
+        library.set("executeScript", new executeScript(this.computer));
+        library.set("registerCommand", new registerCommand(this.computer));
         env.set("lunan", library);
         return library;
     }
@@ -98,7 +102,20 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue output) {
-            TerminalIO.println(output.checkjstring());
+            if (output.isboolean()) {
+                TerminalIO.println(output.checkboolean());
+            } else if (output.isint()) {
+                TerminalIO.println(output.checkint());
+            } else if (output.istable()) {
+                LuaTable table = (LuaTable) output;
+                StringBuilder buffer = new StringBuilder();
+                for (int i = 0; i < table.length(); i++) {
+                    buffer.append(table.get(i));
+                }
+                TerminalIO.println(buffer.toString());
+            } else if (output.isstring()){
+                TerminalIO.println(output.checkjstring());
+            }
             return null;
         }
     }
@@ -108,7 +125,20 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue output) {
-            TerminalIO.print(output.checkjstring());
+            if (output.isboolean()) {
+                TerminalIO.print(output.checkboolean());
+            } else if (output.isint()) {
+                TerminalIO.print(output.checkint());
+            } else if (output.istable()) {
+                LuaTable table = (LuaTable) output;
+                StringBuilder buffer = new StringBuilder();
+                for (int i = 0; i < table.length(); i++) {
+                    buffer.append(table.get(i));
+                }
+                TerminalIO.print(buffer.toString());
+            } else if (output.isstring()){
+                TerminalIO.print(output.checkjstring());
+            }
             return null;
         }
     }
@@ -236,7 +266,7 @@ public class LunanLib extends TwoArgFunction {
         }
     }
 
-    static class readFile extends OneArgFunction {
+    static class readFile extends TwoArgFunction {
         public Computer computer;
 
         public readFile(Computer computer) {
@@ -244,15 +274,30 @@ public class LunanLib extends TwoArgFunction {
         }
 
         @Override
-        public LuaValue call(LuaValue luaValue) {
-            List<String> content = this.computer.filesystem.readFile(luaValue.checkjstring());
-            LuaTable lua_content = new LuaTable();
+        public LuaValue call(LuaValue luaValue, LuaValue htmlSafe) {
+            try {
+                L_File file = computer.filesystem.getFile(luaValue.checkjstring());
+                if (file == null) {
+                    return null;
+                }
+                List<String> content = file.content;
+                LuaTable lua_content = new LuaTable();
 
-            for (String i : content) {
-                lua_content.add(LuaValue.valueOf(i));
+                if (htmlSafe.checkboolean()) {
+                    for (String i : content) {
+                        lua_content.insert(0, LuaValue.valueOf(i.replaceAll(" ", Constants.htmlSpace)));
+                    }
+                } else {
+                    for (String i : content) {
+                        lua_content.insert(0, LuaValue.valueOf(i));
+                    }
+                }
+
+                return lua_content;
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            return lua_content;
+            return null;
         }
     }
 
@@ -378,7 +423,7 @@ public class LunanLib extends TwoArgFunction {
         public LuaValue call(LuaValue path, LuaValue perms) {
             FilesystemComponent child = this.computer.filesystem.getChild(path.checkjstring());
             User user = child.owner;
-            if (user.equals(this.computer.currUser) || this.computer.currUser.equals(this.computer.rootUser)) {
+            if (user.equals(this.computer.currUser) || !computer.hasRootPerms(computer.currUser)) {
                 child.setUserPermissions(perms.checkjstring());
                 return LuaValue.valueOf(true);
             } else {
@@ -423,11 +468,10 @@ public class LunanLib extends TwoArgFunction {
                     retValue.add(i);
                     if (buffer[0].isBlank()) {
                         retValue.add("a");
-                        retValue.add(buffer[1]);
                     } else {
                         retValue.add(buffer[0]);
-                        retValue.add(buffer[1]);
                     }
+                    retValue.add(buffer[1]);
                     break;
                 }
             }
@@ -438,6 +482,10 @@ public class LunanLib extends TwoArgFunction {
         // I am aware this is a mess and I'm sorry, it's currently 9:15 am and I've been up since 4 am. if it works, it works
         @Override
         public LuaValue call(LuaValue luaValue) {
+            if (!computer.hasRootPerms(computer.currUser)) {
+                TerminalIO.println("error: insufficient permissions");
+                return LuaValue.valueOf(false);
+            }
             try {
                 String usageMessage = "usage: chmod [OPTIONS] [oga][-+=][rwx] [PATH]";
                 ProcessedText in = new ProcessedText(luaValue.checkjstring());
@@ -530,7 +578,7 @@ public class LunanLib extends TwoArgFunction {
                 e.printStackTrace();
             }
 
-            return null;
+            return LuaValue.valueOf(true);
         }
     }
 
@@ -543,8 +591,7 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue name, LuaValue password) {
-            User currUser = computer.currUser;
-            if (!currUser.equals(computer.rootUser)) {
+            if (!computer.hasRootPerms(computer.currUser)) {
                 return LuaValue.valueOf(false);
             }
             for (User i : computer.allUsers.members) {
@@ -568,8 +615,7 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue userName, LuaValue password) {
-            User currUser = computer.currUser;
-            if (!currUser.equals(computer.rootUser)) {
+            if (!computer.hasRootPerms(computer.currUser)) {
                 return LuaValue.valueOf(false);
             }
             computer.allUsers.get(userName.checkjstring()).password = password.checkjstring();
@@ -586,8 +632,7 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue currName, LuaValue newName) {
-            User currUser = computer.currUser;
-            if (!currUser.equals(computer.rootUser)) {
+            if (!computer.hasRootPerms(computer.currUser)) {
                 return LuaValue.valueOf(false);
             }
             computer.allUsers.get(currName.checkjstring()).uName = newName.checkjstring();
@@ -604,8 +649,7 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue name) {
-            User currUser = computer.currUser;
-            if (!currUser.equals(computer.rootUser)) {
+            if (!computer.hasRootPerms(computer.currUser)) {
                 return LuaValue.valueOf(false);
             }
             User user = computer.allUsers.get(name.checkjstring());
@@ -628,19 +672,32 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue userName, LuaValue groupName) {
-            User currUser = computer.currUser;
-            if (!currUser.equals(computer.rootUser) || computer.allUsers.get(userName.checkjstring()) == null) {
+            if (!computer.hasRootPerms(computer.currUser) || computer.allUsers.get(userName.checkjstring()) == null) {
                 return LuaValue.valueOf(false);
             }
             User user = computer.allUsers.get(userName.checkjstring());
-            for (UserGroup i : computer.groups) {
-                if (i.groupName.equals(groupName.checkjstring())) {
-                    i.add(user);
-                    user.groups.add(i);
-                    return LuaValue.valueOf(true);
+            String gName = groupName.checkjstring();
+            if (gName.contains(",")) {
+                String[] groupNames = gName.split(",");
+                for (String i : groupNames) {
+                    for (UserGroup j : computer.groups) {
+                        if (j.groupName.equals(i)) {
+                            j.add(user);
+                            user.groups.add(j);
+                        }
+                    }
                 }
+                return LuaValue.valueOf(true);
+            } else {
+                for (UserGroup i : computer.groups) {
+                    if (i.groupName.equals(groupName.checkjstring())) {
+                        i.add(user);
+                        user.groups.add(i);
+                        return LuaValue.valueOf(true);
+                    }
+                }
+                return LuaValue.valueOf(false);
             }
-            return LuaValue.valueOf(false);
         }
     }
 
@@ -653,8 +710,7 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue userName, LuaValue groupName) {
-            User currUser = computer.currUser;
-            if (!currUser.equals(computer.rootUser) || computer.allUsers.get(userName.checkjstring()) == null) {
+            if (!computer.hasRootPerms(computer.currUser) || computer.allUsers.get(userName.checkjstring()) == null) {
                 return LuaValue.valueOf(false);
             }
             User user = computer.allUsers.get(userName.checkjstring());
@@ -678,8 +734,7 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue userName, LuaValue newGroup) {
-            User currUser = computer.currUser;
-            if (!currUser.equals(computer.rootUser) || computer.allUsers.get(userName.checkjstring()) == null) {
+            if (!computer.hasRootPerms(computer.currUser) || computer.allUsers.get(userName.checkjstring()) == null) {
                 return LuaValue.valueOf(false);
             }
             User user = computer.allUsers.get(userName.checkjstring());
@@ -742,6 +797,13 @@ public class LunanLib extends TwoArgFunction {
         @Override
         public LuaValue call(LuaValue userName) {
             LuaTable table = LuaValue.tableOf();
+            if (userName.checkjstring().equals("-a")) {
+                List<UserGroup> groups = computer.groups;
+                for (UserGroup i : groups) {
+                    table.insert(table.length(), LuaValue.valueOf(i.groupName));
+                }
+                return table;
+            }
             User user = computer.allUsers.get(userName.checkjstring());
             if (user == null) {
                 return null;
@@ -765,8 +827,7 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue groupName) {
-            User currUser = computer.currUser;
-            if (!currUser.equals(computer.rootUser)) {
+            if (!computer.hasRootPerms(computer.currUser)) {
                 return LuaValue.valueOf(false);
             }
             for (UserGroup i : computer.groups) {
@@ -788,8 +849,7 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue groupName) {
-            User currUser = computer.currUser;
-            if (!currUser.equals(computer.rootUser)) {
+            if (!computer.hasRootPerms(computer.currUser)) {
                 return LuaValue.valueOf(false);
             }
             computer.groups.add(new UserGroup(groupName.checkjstring(), computer));
@@ -944,6 +1004,53 @@ public class LunanLib extends TwoArgFunction {
                 e.printStackTrace();
             }
             return null;
+        }
+    }
+
+    static class registerCommand extends OneArgFunction {
+        public Computer computer;
+
+        public registerCommand(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue luaValue) {
+            String path = luaValue.checkjstring();
+            L_File file = computer.filesystem.getFile(path);
+            if (file == null) {
+                return LuaValue.valueOf(false);
+            }
+            Command command = new Command(file);
+            if (!computer.commands.contains(command)) {
+                computer.commands.add(command);
+                return LuaValue.valueOf(true);
+            }
+            return LuaValue.valueOf(false);
+        }
+    }
+
+    static class executeScript extends TwoArgFunction {
+        Computer computer;
+
+        public executeScript(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue scriptPath, LuaValue args) {
+            try {
+                String path = scriptPath.checkjstring();
+                String[] buffer = path.split("/");
+                if (computer.filesystem.getFile(path) != null) {
+                    LuaUtil.run(path, new ProcessedText(buffer[buffer.length - 1] + " " + args.checkjstring()), computer);
+                    return LuaValue.valueOf(true);
+                }
+                return LuaValue.valueOf(false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return LuaValue.valueOf(false);
         }
     }
 }

@@ -57,6 +57,13 @@ public class Folder extends FilesystemComponent {
         if (!this.canWrite(this.computer.currUser)) {
             return;
         }
+        for (FilesystemComponent i : this.children) {
+            for (FilesystemComponent j : children) {
+                if (i.cName.equals(j.cName)) {
+                    return;
+                }
+            }
+        }
         this.children.addAll(Arrays.asList(children));
         for (FilesystemComponent i : children) {
             if (i instanceof Folder) {
@@ -70,6 +77,11 @@ public class Folder extends FilesystemComponent {
     public void add(FilesystemComponent child) {
         if (!this.canWrite(this.computer.currUser)) {
             return;
+        }
+        for (FilesystemComponent i : children) {
+            if (i.cName.equals(child.cName)) {
+                return;
+            }
         }
         this.children.add(child);
         if (child instanceof Folder) {

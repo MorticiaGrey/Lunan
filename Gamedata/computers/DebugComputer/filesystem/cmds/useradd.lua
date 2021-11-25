@@ -11,4 +11,6 @@ if not (args[1] == nil) then
             print("error: user exists or insufficient permissions")
         end
     end
+else
+    print("usage: useradd [OPTIONS] [USER_NAME]]")
 end

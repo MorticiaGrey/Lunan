@@ -87,6 +87,12 @@ public class L_File extends FilesystemComponent {
     }
 
     @Override
+    public void setUserPermissions(String perms) {
+        super.setUserPermissions(perms);
+        this.executable = this.perms.ownerExecute || this.perms.groupExecute || this.perms.allExecute;
+    }
+
+    @Override
     public void save() {
         this.discFile = DiscUtils.writeFile(computer.filesystem.path + this.getPath(), this.content);
     }

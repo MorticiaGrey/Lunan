@@ -28,6 +28,7 @@ public class GameDataThread implements Runnable {
             for (Computer i : Gamedata.computers) {
                 i.filesystem.save();
             }
+            Gamedata.playerComputer.config.save();
             System.out.println("Gamedata Thread Closed.");
         } catch (Exception e) {
             System.out.println(e.getMessage());

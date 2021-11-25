@@ -5,6 +5,12 @@ import com.company.Morticia.UI.UI;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.text.Document;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -23,6 +29,9 @@ public class TerminalGUI implements MouseWheelListener, KeyListener {
     public static List<String> input = new ArrayList<>();
     public static String currInput = "";
     public static int inputIndex = -1;
+
+    public static final UndoManager undo = new UndoManager();
+    public static Document doc;
 
     /**
      * Starts the terminal interface
@@ -76,6 +85,13 @@ public class TerminalGUI implements MouseWheelListener, KeyListener {
         });
         inputField.addMouseWheelListener(new TerminalGUI());
         inputField.addKeyListener(new TerminalGUI());
+        doc = inputField.getDocument();
+        doc.addUndoableEditListener(new UndoableEditListener() {
+            @Override
+            public void undoableEditHappened(UndoableEditEvent e) {
+                undo.addEdit(e.getEdit());
+            }
+        });
 
         inputField.setForeground(Color.WHITE);
         inputField.setBackground(Color.BLACK);
@@ -133,6 +149,20 @@ public class TerminalGUI implements MouseWheelListener, KeyListener {
             }
             if (!input.isEmpty()) {
                 ((JTextField) userInputPanel.getComponent(0)).setText(input.get(inputIndex));
+            }
+        } else if (e.isControlDown()) {
+            if (e.getKeyCode() == 90) {
+                try {
+                    if (undo.canUndo()) {
+                        undo.undo();
+                    }
+                } catch (CannotUndoException ignored) {}
+            } else if (e.getKeyCode() == 89) {
+                try {
+                    if (undo.canRedo()) {
+                        undo.redo();
+                    }
+                } catch (CannotRedoException ignored) {}
             }
         }
     }

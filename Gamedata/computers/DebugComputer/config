@@ -1,2 +1,4 @@
 name: DebugComputer
 acceptPlayerControl: true
+terminalFontSize: 12
+fileEditorFontSize: 12

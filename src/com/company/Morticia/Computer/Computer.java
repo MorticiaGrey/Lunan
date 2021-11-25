@@ -83,12 +83,28 @@ public class Computer implements NetworkListener, LunanEventListener {
     }
 
     public void processCommand(ProcessedText in) {
+        if (in.command.startsWith("./")) {
+            in.args.add(0, in.command.replaceFirst("./", ""));
+            in.command = "execute";
+        } else if (in.command.equals("sudo")) {
+            if (rootUser.password.equals(TerminalIO.nextLine("[sudo] password for root: "))) {
+                in.command = in.args.get(0);
+                in.args.remove(0);
+                currUser.sudoEnabled = true;
+            } else {
+                TerminalIO.println("incorrect password");
+                return;
+            }
+        }
         for (Command i : commands) {
             if (i.name.equals(in.command) && i.file.canExecute(this.currUser)) {
                 i.execute(this, in);
-                break;
+                currUser.sudoEnabled = false;
+                return;
             }
         }
+        currUser.sudoEnabled = false;
+        TerminalIO.println(in.command + ": command not found");
     }
 
     public void tick() {
@@ -103,6 +119,10 @@ public class Computer implements NetworkListener, LunanEventListener {
         return TerminalIO.getColor("#00E268") + "[" + this.currUser.uName + "@" + this.name + " "
                 + TerminalIO.getColor("#FFFFFF") + this.currFolder.cName + TerminalIO.colorReset
                 + TerminalIO.getColor("#00E268") + "]$&nbsp;" + TerminalIO.colorReset; // &nbsp; forces html to add whitespace, so it won't just ignore the space on the end of the input
+    }
+
+    public boolean hasRootPerms(User user) {
+        return user.sudoEnabled || user.equals(rootUser);
     }
 
     @Override

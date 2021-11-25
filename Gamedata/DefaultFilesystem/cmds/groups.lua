@@ -1,6 +1,10 @@
 local groups
 if args[1] == nil then
-    groups = lunan.getGroups(lunan.getCurrUser())
+    if flags[1] == nil then
+        groups = lunan.getGroups(lunan.getCurrUser())
+    elseif flags[1] == "-a" then
+        groups = lunan.getGroups("-a");
+    end
 else
     groups = lunan.getGroups(args[1])
 end
