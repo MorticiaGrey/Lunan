@@ -41,4 +41,9 @@ public class UserGroup {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return this.groupName;
+    }
 }

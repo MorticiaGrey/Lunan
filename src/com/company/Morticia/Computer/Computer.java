@@ -36,6 +36,7 @@ public class Computer implements NetworkListener, LunanEventListener {
 
     public List<Command> commands;
 
+    public String userSavePath;
     public List<UserGroup> groups;
     public UserGroup allUsers;
     public User rootUser;
@@ -57,6 +58,7 @@ public class Computer implements NetworkListener, LunanEventListener {
         this.rootUser = new User("root", "123root", this);
         this.currUser = this.rootUser;
         this.allUsers.add(this.rootUser);
+        this.userSavePath = this.path + "/users";
 
         this.groups.add(allUsers);
 
@@ -77,9 +79,12 @@ public class Computer implements NetworkListener, LunanEventListener {
             config = new ComputerConfig(name, true);
             this.filesystem = new Filesystem(this);
             this.filesystem.initDefault();
+            DiscUtils.writeFile(userSavePath);
         }
         this.filesystem.initDefaultCommands();
         rootUser.homeDir.setUserPermissions("rwx/rwx/r--");
+
+        loadUsers();
     }
 
     public void processCommand(ProcessedText in) {
@@ -123,6 +128,75 @@ public class Computer implements NetworkListener, LunanEventListener {
 
     public boolean hasRootPerms(User user) {
         return user.sudoEnabled || user.equals(rootUser);
+    }
+
+    public UserGroup getGroup(String gName) {
+        for (UserGroup i : groups) {
+            if (i.groupName.equals(gName)) {
+                return i;
+            }
+        }
+        return null;
+    }
+
+    // Saves users and groups to text file
+    public void saveUsers() {
+        List<String> content = new ArrayList<>();
+
+        for (UserGroup i : groups) {
+            if (!i.groupName.equals("all_users") && !i.groupName.equals("root")) {
+                StringBuilder buffer = new StringBuilder("group: " + i.groupName + " ");
+                for (User j : i.members) {
+                    buffer.append(j.uName).append(",");
+                }
+                content.add(buffer.toString());
+            }
+        }
+
+        content.add("");
+
+        for (User i : allUsers.members) {
+            if (!i.uName.equals("root")) {
+                StringBuilder buffer = new StringBuilder("user: " + i.uName + " " + i.password + " ");
+                for (UserGroup j : i.groups) {
+                    buffer.append(j.groupName).append(",");
+                }
+                content.add(buffer.toString());
+            }
+        }
+
+        DiscUtils.writeFile(userSavePath, content);
+    }
+
+    // Loads users from text file if it exists
+    public void loadUsers() {
+        List<String> data = DiscUtils.readFile(userSavePath);
+        if (data == null) {
+            return;
+        }
+        // Groups are made first so users can be added to them as they're loaded
+        for (String i : data) {
+            if (i.startsWith("group: ")) {
+                String[] buffer = i.split(": ");
+                String[] args = buffer[1].split(" ");
+                this.groups.add(new UserGroup(args[0], this));
+            } else if (i.startsWith("user: ")) {
+                String[] buffer = i.split(": ");
+                String[] args = buffer[1].split(" ");
+                User user = new User(args[0], args[1], this);
+                this.allUsers.add(user);
+                String[] userGroups = args[2].split(",");
+                for (String j : userGroups) {
+                    for (UserGroup k : groups) {
+                        if (k.groupName.equals(j) && !user.inGroup(k.groupName)) {
+                            k.add(user);
+                            user.groups.add(k);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override

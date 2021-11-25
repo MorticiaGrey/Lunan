@@ -16,16 +16,20 @@
  - Have chmod mark files executable or not depending on new perms (Done)
  - Add sudo (Done)
  - Redo login so it doesn't take password as argument but uses read() (Done)
- - Fix font glitch where there's no text sometimes on startup
+ - Fix font glitch where there's no text sometimes on startup (Done? hard to tell)
  - Make files and folders unable to share name if have same parent (Done)
  - Rename file/folder command/library function (???)
- - Save userspace configurations (groups, users, etc.)
+ - Save userspace configurations (groups, users, etc.) (Done)
+ - Fix null pointer glitch in groups command (Done)
  - Make client class for network interactions between computers so they can log in to each other
  - Write NetworkObject class
+ - Write Lua functions to interact with new network stuff
  - Write the default networking events
  - (Very) Basic syntax highlighting for the text editor, make it toggleable
  - Write documentation/tutorials
  - Find way to allow puzzles to be made
  - Make the puzzles
+ - Puzzle idea: you can log in as client and make files but not execute them. There's a folder you have access to that
+ you aren't supposed to with execution perms for all.
  - Be gay
  - Do crimes

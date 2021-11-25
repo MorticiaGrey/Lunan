@@ -36,11 +36,16 @@ public class ComputerConfig {
                     } else if (line[0].startsWith("terminalFontSize: ")) {
                         try {
                             TerminalGUI.fontSize = Integer.parseInt(line[1]);
-                        } catch (Exception ignored) {}
+                        } catch (Exception ignored) {
+                            TerminalGUI.fontSize = 12;
+                        }
+                        TerminalGUI.updateFont();
                     } else if (line[0].startsWith("fileEditorFontSize: ")) {
                         try {
                             FileEditorFrame.fontSize = Integer.parseInt(line[1]);
-                        } catch (Exception ignored) {}
+                        } catch (Exception ignored) {
+                            FileEditorFrame.fontSize = 12;
+                        }
                     }
                 }
             }

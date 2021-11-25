@@ -20,6 +20,15 @@ public class Gamedata {
         }
     }
 
+    public static void threadClosed() {
+        playerComputer.filesystem.save();
+        for (Computer i : computers) {
+            i.filesystem.save();
+        }
+        playerComputer.config.save();
+        playerComputer.saveUsers();
+    }
+
     /**
      * Called by UIThread when new input has been passed and needs to be processed
      *

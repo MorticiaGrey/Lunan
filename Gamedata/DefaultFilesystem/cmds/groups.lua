@@ -9,7 +9,7 @@ else
     groups = lunan.getGroups(args[1])
 end
 
-if groups == nil then
+if not groups then
     print("error: user not found")
     return
 end

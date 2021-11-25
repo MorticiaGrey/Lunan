@@ -4,7 +4,6 @@ default: rw-/rw-/r--
 /lib: rwx/rwx/rwx
 /events: rw-/rw-/r--
 /cmds: r-x/r-x/r-x
-/home/test_user: rw-/rw-/r--
 /events/ping.lua: rw-/rw-/r--
 /cmds/usermod.lua: r-x/r-x/r-x
 /cmds/ls.lua: r-x/r-x/r-x

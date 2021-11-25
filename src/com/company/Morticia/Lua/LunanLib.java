@@ -12,6 +12,7 @@ import com.company.Morticia.Events.Event;
 import com.company.Morticia.UI.GUI.FileEditor.FileEditorFrame;
 import com.company.Morticia.UI.GUI.Terminal.TerminalIO;
 import com.company.Morticia.Util.Constants;
+import org.luaj.vm2.LuaNil;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.*;
@@ -116,7 +117,7 @@ public class LunanLib extends TwoArgFunction {
             } else if (output.isstring()){
                 TerminalIO.println(output.checkjstring());
             }
-            return null;
+            return LuaNil.NIL;
         }
     }
 
@@ -139,7 +140,7 @@ public class LunanLib extends TwoArgFunction {
             } else if (output.isstring()){
                 TerminalIO.print(output.checkjstring());
             }
-            return null;
+            return LuaNil.NIL;
         }
     }
 
@@ -158,7 +159,7 @@ public class LunanLib extends TwoArgFunction {
         @Override
         public LuaValue call() {
             TerminalIO.clearTerminal();
-            return null;
+            return LuaNil.NIL;
         }
     }
 
@@ -278,7 +279,7 @@ public class LunanLib extends TwoArgFunction {
             try {
                 L_File file = computer.filesystem.getFile(luaValue.checkjstring());
                 if (file == null) {
-                    return null;
+                    return LuaNil.NIL;
                 }
                 List<String> content = file.content;
                 LuaTable lua_content = new LuaTable();
@@ -297,7 +298,7 @@ public class LunanLib extends TwoArgFunction {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return null;
+            return LuaNil.NIL;
         }
     }
 
@@ -339,7 +340,7 @@ public class LunanLib extends TwoArgFunction {
         public LuaValue call(LuaValue luaValue, LuaValue color) {
             Folder folder = this.computer.filesystem.getFolder(luaValue.checkjstring());
             if (folder == null) {
-                return null;
+                return LuaNil.NIL;
             }
             List<FilesystemComponent> children = new ArrayList<>(folder.children);
             LuaTable lua_children = LuaTable.tableOf();
@@ -373,7 +374,7 @@ public class LunanLib extends TwoArgFunction {
         public LuaValue call(LuaValue luaValue, LuaValue color) {
             Folder folder = this.computer.filesystem.getFolder(luaValue.checkjstring());
             if (folder == null) {
-                return null;
+                return LuaNil.NIL;
             }
             List<FilesystemComponent> children = new ArrayList<>(folder.children);
             LuaTable lua_children = LuaTable.tableOf();
@@ -408,7 +409,7 @@ public class LunanLib extends TwoArgFunction {
         @Override
         public LuaValue call(LuaValue luaValue) {
             this.computer.processCommand(new ProcessedText(luaValue.checkjstring()));
-            return null;
+            return LuaNil.NIL;
         }
     }
 
@@ -510,7 +511,7 @@ public class LunanLib extends TwoArgFunction {
                         for (String i : buffer) {
                             List<String> parsedText = parse(i);
                             if (parsedText.isEmpty()) {
-                                return null;
+                                return LuaNil.NIL;
                             }
                             char[] perms;
                             if (parsedText.get(0).equals("=")) {
@@ -518,7 +519,7 @@ public class LunanLib extends TwoArgFunction {
                             } else if (parsedText.get(0).equals("+") || parsedText.get(0).equals("-")) {
                                 perms = this.computer.filesystem.getChild(path).perms.permsString.replaceAll("/", "").toCharArray();
                             } else {
-                                return null;
+                                return LuaNil.NIL;
                             }
                             char[] whoLetters = parsedText.get(1).toCharArray();
                             char[] whichLetters = parsedText.get(2).toCharArray();
@@ -542,7 +543,7 @@ public class LunanLib extends TwoArgFunction {
                     } else {
                         List<String> parsedText = parse(args.get(0));
                         if (parsedText.isEmpty()) {
-                            return null;
+                            return LuaNil.NIL;
                         }
                         char[] perms;
                         if (parsedText.get(0).equals("=")) {
@@ -550,7 +551,7 @@ public class LunanLib extends TwoArgFunction {
                         } else if (parsedText.get(0).equals("+") || parsedText.get(0).equals("-")) {
                             perms = this.computer.filesystem.getChild(path).perms.permsString.replaceAll("/", "").toCharArray();
                         } else {
-                            return null;
+                            return LuaNil.NIL;
                         }
                         char[] whoLetters = parsedText.get(1).toCharArray();
                         char[] whichLetters = parsedText.get(2).toCharArray();
@@ -806,7 +807,7 @@ public class LunanLib extends TwoArgFunction {
             }
             User user = computer.allUsers.get(userName.checkjstring());
             if (user == null) {
-                return null;
+                return LuaNil.NIL;
             }
             List<UserGroup> groups = user.groups;
 
@@ -903,7 +904,7 @@ public class LunanLib extends TwoArgFunction {
         public LuaValue call(LuaValue luaValue) {
             FilesystemComponent child = computer.filesystem.getChild(luaValue.toString());
             if (child == null) {
-                return null;
+                return LuaNil.NIL;
             }
             return LuaValue.valueOf(child.group.groupName);
         }
@@ -966,7 +967,7 @@ public class LunanLib extends TwoArgFunction {
         @Override
         public LuaValue call(LuaValue eventName) {
             computer.eventTriggered(new Event(eventName.tojstring()));
-            return null;
+            return LuaNil.NIL;
         }
     }
 
@@ -995,15 +996,10 @@ public class LunanLib extends TwoArgFunction {
     static class countTable extends OneArgFunction {
         @Override
         public LuaValue call(LuaValue table) {
-            try {
-                if (!table.istable()) {
-                    return LuaValue.valueOf(0);
-                }
-                return LuaValue.valueOf(table.length());
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (!table.istable()) {
+                return LuaValue.valueOf(0);
             }
-            return null;
+            return LuaValue.valueOf(table.length());
         }
     }
 

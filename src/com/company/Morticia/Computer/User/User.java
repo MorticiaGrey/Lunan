@@ -17,7 +17,12 @@ public class User {
     public User(String uName, String password, Computer parent) {
         this.uName = uName;
         this.password = password;
-        this.group = new UserGroup(uName, parent);
+
+        this.group = parent.getGroup(uName);
+        if (this.group == null) {
+            this.group = new UserGroup(uName, parent);
+            parent.groups.add(group);
+        }
         this.groups = new ArrayList<>();
 
         this.groups.add(parent.allUsers);
@@ -37,8 +42,15 @@ public class User {
         } else {
             sudoEnabled = true;
         }
+    }
 
-        parent.groups.add(group);
+    public boolean inGroup(String gName) {
+        for (UserGroup i : groups) {
+            if (i.groupName.equals(gName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -48,5 +60,10 @@ public class User {
         } else {
             return user.homeDir.getPath().equals(this.homeDir.getPath());
         }
+    }
+
+    @Override
+    public String toString() {
+        return this.uName;
     }
 }

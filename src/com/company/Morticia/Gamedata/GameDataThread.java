@@ -24,11 +24,7 @@ public class GameDataThread implements Runnable {
             while (!thread.isInterrupted()) {
                 Gamedata.tick();
             }
-            Gamedata.playerComputer.filesystem.save();
-            for (Computer i : Gamedata.computers) {
-                i.filesystem.save();
-            }
-            Gamedata.playerComputer.config.save();
+            Gamedata.threadClosed();
             System.out.println("Gamedata Thread Closed.");
         } catch (Exception e) {
             System.out.println(e.getMessage());

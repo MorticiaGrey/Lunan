@@ -100,13 +100,15 @@ public class TerminalGUI implements MouseWheelListener, KeyListener {
         prefixDisplay.setForeground(Color.WHITE);
         prefixDisplay.setBackground(Color.BLACK);
 
+        updateFont();
+
         UI.mainFrame.removeAllComponents();
         frame.add(centerPanel, BorderLayout.CENTER);
         frame.add(userInputPanel, BorderLayout.SOUTH);
         SwingUtilities.updateComponentTreeUI(frame);
     }
 
-    public void updateFont() {
+    public static void updateFont() {
         Component[] components = centerPanel.getComponents();
         for (Component i : components) {
             i.setFont(new Font("Dialog", Font.PLAIN, fontSize));
