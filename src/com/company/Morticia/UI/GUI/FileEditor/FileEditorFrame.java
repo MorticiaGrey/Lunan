@@ -1,14 +1,19 @@
 package com.company.Morticia.UI.GUI.FileEditor;
 
+import com.company.Morticia.Computer.Commands.ProcessedText;
 import com.company.Morticia.Computer.Computer;
 import com.company.Morticia.Computer.Filesystem.L_File;
+import com.company.Morticia.Lua.LuaUtil;
 import com.company.Morticia.UI.GUI.MainFrame;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.Document;
+import javax.swing.text.Element;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -32,6 +37,9 @@ public class FileEditorFrame implements ActionListener, MouseWheelListener, KeyL
 
     public static int fontSize = 12;
     public final int fontSizeQuantum = 2;
+
+    public JTextArea lines;
+    public JScrollPane scrollPane;
 
     public FileEditorFrame(Computer computer, L_File file, boolean canWrite) {
         this.computer = computer;
@@ -70,8 +78,34 @@ public class FileEditorFrame implements ActionListener, MouseWheelListener, KeyL
 
         textArea.setFont(new Font("Dialog", Font.PLAIN, fontSize));
 
-        textArea.addMouseWheelListener(this);
         textArea.addKeyListener(this);
+
+        scrollPane = new JScrollPane() {
+            @Override
+            public void setBorder(Border border) {
+                // No border
+            }
+        };
+
+        scrollPane.addMouseWheelListener(this);
+
+        JScrollBar vertical = scrollPane.getVerticalScrollBar();
+        JScrollBar horizontal = scrollPane.getHorizontalScrollBar();
+
+        vertical.setPreferredSize(new Dimension(0, 0));
+        horizontal.setPreferredSize(new Dimension(0, 0));
+
+        lines = new JTextArea("1 ") {
+            @Override
+            public void setBorder(Border border) {
+                // No border
+            }
+        };
+        lines.setBackground(Color.BLACK);
+        lines.setForeground(Color.GRAY);
+        lines.setEditable(false);
+
+        lines.setFont(new Font("Dialog", Font.PLAIN, fontSize));
 
         // Undo/redo listener
         doc = textArea.getDocument();
@@ -79,6 +113,33 @@ public class FileEditorFrame implements ActionListener, MouseWheelListener, KeyL
             @Override
             public void undoableEditHappened(UndoableEditEvent e) {
                 undo.addEdit(e.getEdit());
+            }
+        });
+        doc.addDocumentListener(new DocumentListener() {
+            public String getText() {
+                int caretPosition = doc.getLength();
+                Element root = doc.getDefaultRootElement();
+                String lineSep = System.getProperty("line.separator");
+                String text = "1 " + lineSep;
+                for (int i = 2; i < root.getElementIndex(caretPosition) + 2; i++) {
+                    text += i + " " + lineSep;
+                }
+                return text;
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                lines.setText(getText());
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                lines.setText(getText());
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                lines.setText(getText());
             }
         });
 
@@ -144,8 +205,15 @@ public class FileEditorFrame implements ActionListener, MouseWheelListener, KeyL
         textArea.setForeground(Color.WHITE);
         textArea.setCaretColor(Color.WHITE);
 
+        scrollPane.setBackground(Color.BLACK);
+        scrollPane.setForeground(Color.BLACK);
+
+        scrollPane.getViewport().add(textArea);
+        scrollPane.setRowHeaderView(lines);
+
         frame.setJMenuBar(menuBar);
-        frame.add(textArea);
+        //frame.add(textArea);
+        frame.add(scrollPane);
 
         file.editors.add(this);
 
@@ -171,6 +239,7 @@ public class FileEditorFrame implements ActionListener, MouseWheelListener, KeyL
             textArea.setText(buffer.toString());
         } else {
             textArea.setText("");
+            lines.setText("1 ");
         }
     }
 
@@ -187,12 +256,14 @@ public class FileEditorFrame implements ActionListener, MouseWheelListener, KeyL
             case "Increase Font Size" -> {
                 fontSize += fontSizeQuantum;
                 textArea.setFont(new Font("Dialog", Font.PLAIN, fontSize));
+                lines.setFont(new Font("Dialog", Font.PLAIN, fontSize));
             }
             case "Decrease Font Size" -> {
                 if (fontSize > fontSizeQuantum) {
                     fontSize -= fontSizeQuantum;
                 }
                 textArea.setFont(new Font("Dialog", Font.PLAIN, fontSize));
+                lines.setFont(new Font("Dialog", Font.PLAIN, fontSize));
             }
         }
     }
@@ -203,12 +274,16 @@ public class FileEditorFrame implements ActionListener, MouseWheelListener, KeyL
             if (e.getWheelRotation() < 0) {
                 fontSize += fontSizeQuantum;
                 textArea.setFont(new Font("Dialog", Font.PLAIN, fontSize));
+                lines.setFont(new Font("Dialog", Font.PLAIN, fontSize));
             } else {
                 if (fontSize > fontSizeQuantum) {
                     fontSize -= fontSizeQuantum;
                 }
                 textArea.setFont(new Font("Dialog", Font.PLAIN, fontSize));
+                lines.setFont(new Font("Dialog", Font.PLAIN, fontSize));
             }
+        } else {
+
         }
     }
 
@@ -239,6 +314,14 @@ public class FileEditorFrame implements ActionListener, MouseWheelListener, KeyL
                 } catch (CannotRedoException ignored) {}
             } else if (e.getKeyCode() == 83) {
                 save();
+            }
+        }
+        if (e.isShiftDown()) {
+            if (e.getKeyCode() == 121) { // shift + f10
+                if (file.executable && file.canExecute(file.computer.currUser)) {
+                    save();
+                    LuaUtil.run(file.getPath(), new ProcessedText(""), file.computer);
+                }
             }
         }
     }

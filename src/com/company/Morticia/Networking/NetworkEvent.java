@@ -17,7 +17,7 @@ public class NetworkEvent extends Event {
     public List<String> data;
 
     public NetworkEvent(String eventName, String eventPath, NetworkAddress src, NetworkAddress dst, String protocol, List<String> data) {
-        super(eventName, eventPath);
+        super(eventName, eventPath, new ArrayList<>());
         this.src = src;
         this.dst = dst;
         this.protocol = protocol;
@@ -25,7 +25,7 @@ public class NetworkEvent extends Event {
     }
 
     public NetworkEvent(String eventName, NetworkAddress src, NetworkAddress dst, String protocol, List<String> data) {
-        super(eventName);
+        super(eventName, new ArrayList<>());
         this.src = src;
         this.dst = dst;
         this.protocol = protocol;

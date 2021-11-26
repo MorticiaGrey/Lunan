@@ -19,6 +19,7 @@ public class TerminalIO {
     public static synchronized void println(Object arg) {
         String currText = ((JLabel) TerminalGUI.centerPanel.getComponent(cmpn)).getText();
         ((JLabel) TerminalGUI.centerPanel.getComponent(cmpn)).setText(currText + "<br>" + arg.toString());
+        TerminalGUI.scrollToBottom();
     }
 
     /**
@@ -29,6 +30,7 @@ public class TerminalIO {
     public static synchronized void print(Object arg) {
         String currText = ((JLabel) TerminalGUI.centerPanel.getComponent(cmpn)).getText();
         ((JLabel) TerminalGUI.centerPanel.getComponent(cmpn)).setText(currText + arg.toString());
+        TerminalGUI.scrollToBottom();
     }
 
     public static synchronized String nextLine() {

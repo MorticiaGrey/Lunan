@@ -1,16 +1,25 @@
 package com.company.Morticia.Networking;
 
+import com.company.Morticia.Computer.Computer;
+import com.company.Morticia.Util.DiscUtils.DiscUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class NetworkAddress {
     public String address;
+    public String routerName;
     public NetworkListener listener;
 
     public NetworkAddress(String address, NetworkListener listener) {
         this.address = address;
         this.listener = listener;
+        this.routerName = listener.getRouter().routerName;
     }
 
     public NetworkAddress(NetworkListener listener) {
         this.listener = listener;
+        this.routerName = listener.getRouter().routerName;
         boolean done = false;
         while (!done) {
             done = true;
@@ -30,5 +39,44 @@ public class NetworkAddress {
 
     public String generateRandomIp() {
         return getRandomInt(0, 999) + "." + getRandomInt(0, 999) + "." + getRandomInt(0, 999) + "." + getRandomInt(0, 999);
+    }
+
+    public void save() {
+        if (listener.getAddress().listener instanceof Computer computer) {
+            String savePath = computer.path + "/networkData";
+            List<String> contents = new ArrayList<>();
+
+            contents.add("address: " + address);
+            contents.add("router: " + listener.getRouter().routerName);
+
+            DiscUtils.writeFile(savePath, contents);
+        }
+    }
+
+    public void load() {
+        if (listener.getAddress().listener instanceof Computer computer) {
+            String savePath = computer.path + "/networkData";
+            List<String> contents;
+            try {
+                contents = DiscUtils.readFile(savePath);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+
+            if (contents == null) {
+                return;
+            }
+
+            for (String i : contents) {
+                if (i.startsWith("address: ")) {
+                    String[] buffer = i.split(": ");
+                    address = buffer[1];
+                } else if (i.startsWith("router: ")) {
+                    String[] buffer = i.split(": ");
+                    routerName = buffer[1];
+                }
+            }
+        }
     }
 }

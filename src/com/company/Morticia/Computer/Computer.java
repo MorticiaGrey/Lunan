@@ -9,6 +9,7 @@ import com.company.Morticia.Computer.User.User;
 import com.company.Morticia.Computer.User.UserGroup;
 import com.company.Morticia.Events.Event;
 import com.company.Morticia.Events.LunanEventListener;
+import com.company.Morticia.Gamedata.Scenario;
 import com.company.Morticia.Networking.NetworkAddress;
 import com.company.Morticia.Networking.NetworkEvent;
 import com.company.Morticia.Networking.NetworkListener;
@@ -25,8 +26,10 @@ public class Computer implements NetworkListener, LunanEventListener {
 
     public ComputerConfig config;
 
+    public boolean isPlayerComputer;
+
     public int id;
-    public String name;
+    public String compName;
     public String path;
 
     public Filesystem filesystem;
@@ -45,11 +48,17 @@ public class Computer implements NetworkListener, LunanEventListener {
     public Router router;
     public NetworkAddress address;
 
-    public Computer(String name, Router router) {
+    public Computer(String compName, Scenario scenario, Router router) {
         this.id = numOfComputers;
         numOfComputers += 1;
-        this.path = Constants.computersPath + "/" + name;
-        this.name = name;
+        this.isPlayerComputer = false;
+        //this.path = Constants.computersPath + "/" + scenario.scenarioName + "/" + compName;
+        if (Constants.debugMode || !scenario.playedBefore) {
+            this.path = "/" + scenario.scenarioName + "/" + compName;
+        } else {
+            this.path = Constants.computersPath + "/" + scenario.scenarioName + "/" + compName;
+        }
+        this.compName = compName;
         this.input = new ArrayList<>();
         this.commands = new ArrayList<>();
 
@@ -65,18 +74,15 @@ public class Computer implements NetworkListener, LunanEventListener {
         this.router = router;
         this.address = new NetworkAddress(this);
 
-        // TODO: 11/20/21 Remove this later
-        DiscUtils.deleteFolder(this.path);
-
         if (DiscUtils.folderExists(this.path)) {
             // Load data from config file, load files into filesystem class
-            config = new ComputerConfig(this.path + "/config");
+            config = new ComputerConfig(this);
             this.filesystem = new Filesystem(this);
             this.filesystem.load();
         } else {
             // Create default config file, make new default filesystem
             DiscUtils.writeFolder(this.path);
-            config = new ComputerConfig(name, true);
+            config = new ComputerConfig(this, true);
             this.filesystem = new Filesystem(this);
             this.filesystem.initDefault();
             DiscUtils.writeFile(userSavePath);
@@ -85,6 +91,10 @@ public class Computer implements NetworkListener, LunanEventListener {
         rootUser.homeDir.setUserPermissions("rwx/rwx/r--");
 
         loadUsers();
+        this.address.load();
+        this.path = Constants.computersPath + "/" + scenario.scenarioName + "/" + compName;
+        this.userSavePath = this.path + "/users";
+        save();
     }
 
     public void processCommand(ProcessedText in) {
@@ -121,7 +131,7 @@ public class Computer implements NetworkListener, LunanEventListener {
     }
 
     public String generatePrefix() {
-        return TerminalIO.getColor("#00E268") + "[" + this.currUser.uName + "@" + this.name + " "
+        return TerminalIO.getColor("#00E268") + "[" + this.currUser.uName + "@" + this.compName + " "
                 + TerminalIO.getColor("#FFFFFF") + this.currFolder.cName + TerminalIO.colorReset
                 + TerminalIO.getColor("#00E268") + "]$&nbsp;" + TerminalIO.colorReset; // &nbsp; forces html to add whitespace, so it won't just ignore the space on the end of the input
     }
@@ -197,6 +207,14 @@ public class Computer implements NetworkListener, LunanEventListener {
                 }
             }
         }
+    }
+
+    public void save() {
+        DiscUtils.writeFolder(path + "/filesystem");
+        this.filesystem.save();
+        this.saveUsers();
+        this.config.save();
+        this.address.save();
     }
 
     @Override

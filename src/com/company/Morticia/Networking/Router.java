@@ -33,4 +33,14 @@ public class Router {
         }
         return false;
     }
+
+    public void save() {
+        for (NetworkListener i : children) {
+            i.getAddress().save();
+        }
+    }
+
+    public void load() {
+
+    }
 }

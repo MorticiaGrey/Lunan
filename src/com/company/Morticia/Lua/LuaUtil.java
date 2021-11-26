@@ -2,6 +2,7 @@ package com.company.Morticia.Lua;
 
 import com.company.Morticia.Computer.Commands.ProcessedText;
 import com.company.Morticia.Computer.Computer;
+import com.company.Morticia.UI.GUI.Terminal.TerminalIO;
 import com.company.Morticia.Util.Constants;
 import com.company.Morticia.Util.DiscUtils.DiscUtils;
 import org.luaj.vm2.*;
@@ -41,7 +42,7 @@ public class LuaUtil {
         userGlobals.load(new JseMathLib());
 
         userGlobals.load(new LunanLib(computer, script));
-        userGlobals.set("print", new LunanLib.l_print());
+        userGlobals.set("print", new LunanLib.l_print(computer));
 
         userGlobals.set("raw_input", LuaValue.valueOf(in.original));
         userGlobals.set("args", in.argsToLuaTable());
@@ -55,7 +56,11 @@ public class LuaUtil {
         LoadState.install(userGlobals);
         LuaC.install(userGlobals);
 
-        userGlobals.loadfile(DiscUtils.makeObjectivePath(computer.filesystem.path + script)).call();
+        try {
+            userGlobals.loadfile(DiscUtils.makeObjectivePath(computer.filesystem.path + script)).call();
+        } catch (Exception e) {
+            TerminalIO.println(TerminalIO.wrapInColor(e.getMessage(), "f7261b"));
+        }
     }
 
     // Simple read-only table whose contents are initialized from another table.

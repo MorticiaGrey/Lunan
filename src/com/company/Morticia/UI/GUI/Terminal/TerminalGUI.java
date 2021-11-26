@@ -33,6 +33,15 @@ public class TerminalGUI implements MouseWheelListener, KeyListener {
     public static final UndoManager undo = new UndoManager();
     public static Document doc;
 
+    public static JScrollPane scrollPane = new JScrollPane() {
+        @Override
+        public void setBorder(Border border) {
+            // No border
+        }
+    };
+    public static JScrollBar vertical;
+    public static JScrollBar horizontal;
+
     /**
      * Starts the terminal interface
      */
@@ -51,7 +60,19 @@ public class TerminalGUI implements MouseWheelListener, KeyListener {
         outputDisplay.setBackground(Color.BLACK);
         outputDisplay.setForeground(Color.WHITE);
 
-        outputDisplay.addMouseWheelListener(new TerminalGUI());
+        scrollPane.addMouseWheelListener(new TerminalGUI());
+
+        scrollPane.setBackground(Color.BLACK);
+        scrollPane.setForeground(Color.white);
+
+        vertical = scrollPane.getVerticalScrollBar();
+        horizontal = scrollPane.getHorizontalScrollBar();
+
+        vertical.setUnitIncrement(16);
+        horizontal.setUnitIncrement(16);
+
+        vertical.setPreferredSize(new Dimension(0, 0));
+        horizontal.setPreferredSize(new Dimension(0, 0));
 
         centerPanel.add(outputDisplay, BorderLayout.CENTER);
 
@@ -103,7 +124,9 @@ public class TerminalGUI implements MouseWheelListener, KeyListener {
         updateFont();
 
         UI.mainFrame.removeAllComponents();
-        frame.add(centerPanel, BorderLayout.CENTER);
+        //frame.add(centerPanel, BorderLayout.CENTER);
+        scrollPane.getViewport().add(centerPanel);
+        frame.add(scrollPane);
         frame.add(userInputPanel, BorderLayout.SOUTH);
         SwingUtilities.updateComponentTreeUI(frame);
     }
@@ -182,5 +205,16 @@ public class TerminalGUI implements MouseWheelListener, KeyListener {
                 updateFont();
             }
         }
+    }
+
+    public static void scrollToBottom() {
+        vertical.addAdjustmentListener(new AdjustmentListener() {
+            @Override
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                Adjustable adjustable = e.getAdjustable();
+                adjustable.setValue(adjustable.getMaximum());
+                vertical.removeAdjustmentListener(this);
+            }
+        });
     }
 }

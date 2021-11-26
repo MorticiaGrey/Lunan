@@ -264,6 +264,7 @@ public class Filesystem {
      * Saves filesystem to disc
      */
     public void save() {
+        this.path = parent.path + "/filesystem";
         root.saveChildren();
         permsEncoder.save();
     }
@@ -287,6 +288,35 @@ public class Filesystem {
         this.path = bufferPath;
         this.permsEncoder.savePath = bufferSavePath;
         save();
+    }
+
+    public void loadFrom(String tempPath, String permsFilePath) {
+        DiscUtils.deleteFolder(path);
+        DiscUtils.writeFolder(path);
+
+        String bufferPath = this.path;
+        String bufferSavePath = this.permsEncoder.savePath;
+
+        this.path = tempPath;
+        //System.out.println(permsFilePath);
+        this.permsEncoder.savePath = permsFilePath;
+        load();
+
+        this.path = bufferPath;
+        this.permsEncoder.savePath = bufferSavePath;
+        save();
+    }
+
+    public void saveTo(String tempPath, String permsFolderPath) {
+        String bufferPath = this.path;
+        String bufferSavePath = this.permsEncoder.savePath;
+
+        this.path = tempPath;
+        this.permsEncoder.savePath = permsFolderPath + "/filesystemPerms";
+        save();
+
+        this.path = bufferPath;
+        this.permsEncoder.savePath = bufferSavePath;
     }
 
     /**

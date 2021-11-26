@@ -16,7 +16,7 @@
  - Have chmod mark files executable or not depending on new perms (Done)
  - Add sudo (Done)
  - Redo login so it doesn't take password as argument but uses read() (Done)
- - Fix font glitch where there's no text sometimes on startup (Done? hard to tell)
+ - Fix font glitch where there's no text sometimes on startup (Done? hard to tell) (Not done, fix this idiot)
  - Make files and folders unable to share name if have same parent (Done)
  - Rename file/folder command/library function (???)
  - Save userspace configurations (groups, users, etc.) (Done)
@@ -28,11 +28,23 @@
  - Rename file/directory command (Done)
  - Function to wrap text in color lua (Done)
  - Advanced terminal stuff like piping input (All this terminal stuff will be the next update, for now I just want to finish)
- - (Very) Basic syntax highlighting for the text editor, make it toggleable
- - Write documentation/tutorials
- - Find way to allow puzzles to be made
+ - (Very) Basic syntax highlighting for the text editor, make it toggleable (maybe undoable)
+ - Line numbering in text editor (Done)
+ - Fucking scroll bar in text editor you moron (Done)
+ - Write documentation/tutorials (Done)
+ - Make it print error messages to terminal (Done)
+ - Add scrollpane to terminal output (Done)
+ - Make trigger event take args (Done)
+ - Keyboard shortcut from file editor to execute current file (Done, shift+f10)
+ - (Eventually) make shortcut able to pass custom args
+ - Function to throw error from lua (Done)
+ - Save network data (Done)
+ - Commands to get all ips on network/ip address of this computer (Done)
+ - Output stream/otherwise make non current computers not print to console (Still add input stream eventually but for now works)
+ - Find way to allow puzzles to be made (Done)
  - Make the puzzles
  - Puzzle idea: you can log in as client and make files but not execute them. There's a folder you have access to that
- you aren't supposed to with execution perms for all.
+ you aren't supposed to with execution perms for all. From here you can trigger event hinted at that executes
+ commands passed as root
  - Be gay
  - Do crimes

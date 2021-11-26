@@ -1,17 +1,21 @@
 package com.company.Morticia.Gamedata;
 
 import com.company.Morticia.Computer.Computer;
-import com.company.Morticia.Networking.Router;
 import com.company.Morticia.UI.GUI.Terminal.TerminalIO;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Gamedata {
-    // This will be changed with the implementation of scenarios, for bug testing it's faster though
-    public static Router playerRouter = new Router("playerRouter", null);
-    public static Computer playerComputer = new Computer("DebugComputer", playerRouter);
-    public static List<Computer> computers = new ArrayList<>();
+    public static Computer playerComputer;
+    public static List<Computer> computers;
+
+    public static void threadStarted() {
+        Scenario.initScenarios();
+        playerComputer = Scenario.getCurrScenario().defaultPlayerComputer;
+        playerComputer.isPlayerComputer = true;
+        computers = Scenario.getCurrScenario().computers;
+        Scenario.getCurrScenario().load();
+    }
 
     public static void tick() {
         playerComputer.tick();
@@ -21,12 +25,13 @@ public class Gamedata {
     }
 
     public static void threadClosed() {
-        playerComputer.filesystem.save();
+        /*playerComputer.filesystem.save();
         for (Computer i : computers) {
             i.filesystem.save();
         }
         playerComputer.config.save();
-        playerComputer.saveUsers();
+        playerComputer.saveUsers();*/
+        Scenario.getCurrScenario().save();
     }
 
     /**
@@ -35,7 +40,7 @@ public class Gamedata {
      * @param input Input to be handled
      */
     public static void handleInput(String input) {
-        TerminalIO.println(playerComputer.generatePrefix() + " " + input);
+        TerminalIO.println(playerComputer.generatePrefix() + input);
         playerComputer.input.add(input);
     }
 }

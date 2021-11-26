@@ -1,4 +1,4 @@
-name: DebugComputer
+name: DebugComp
 acceptPlayerControl: true
 terminalFontSize: 12
 fileEditorFontSize: 12

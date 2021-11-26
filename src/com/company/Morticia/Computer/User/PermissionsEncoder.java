@@ -77,6 +77,7 @@ public class PermissionsEncoder {
                 }
             }
         }*/
+        savePath = this.computer.path + "/filePermissions";
         DiscUtils.writeFile(this.savePath, Collections.singletonList("default: " + this.defaultPerms));
         saveFolder(filesystem.root);
     }

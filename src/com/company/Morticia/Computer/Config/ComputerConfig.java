@@ -1,5 +1,6 @@
 package com.company.Morticia.Computer.Config;
 
+import com.company.Morticia.Computer.Computer;
 import com.company.Morticia.UI.GUI.FileEditor.FileEditorFrame;
 import com.company.Morticia.UI.GUI.Terminal.TerminalGUI;
 import com.company.Morticia.Util.Constants;
@@ -14,12 +15,18 @@ public class ComputerConfig {
     public String compName;
     public boolean acceptPlayerControl;
 
+    public Computer computer;
+
     /**
      * Takes a path to a file and interprets the text in it to convert it to easily accessible variables
      *
-     * @param path Path to file with text
+     * @param computer Computer loading this
      */
-    public ComputerConfig(String path) {
+    public ComputerConfig(Computer computer) {
+        this.computer = computer;
+        this.compName = computer.compName;
+        this.acceptPlayerControl = true;
+        String path = computer.path + "/config";
         List<String> text = DiscUtils.readFile(path);
         if (text == null) {
             DiscUtils.writeFile(path);
@@ -36,6 +43,9 @@ public class ComputerConfig {
                     } else if (line[0].startsWith("terminalFontSize: ")) {
                         try {
                             TerminalGUI.fontSize = Integer.parseInt(line[1]);
+                            if (TerminalGUI.fontSize == 0) {
+                                TerminalGUI.fontSize = 12;
+                            }
                         } catch (Exception ignored) {
                             TerminalGUI.fontSize = 12;
                         }
@@ -43,6 +53,9 @@ public class ComputerConfig {
                     } else if (line[0].startsWith("fileEditorFontSize: ")) {
                         try {
                             FileEditorFrame.fontSize = Integer.parseInt(line[1]);
+                            if (FileEditorFrame.fontSize == 0) {
+                                FileEditorFrame.fontSize = 12;
+                            }
                         } catch (Exception ignored) {
                             FileEditorFrame.fontSize = 12;
                         }
@@ -52,15 +65,17 @@ public class ComputerConfig {
         }
     }
 
-    public ComputerConfig(String compName, boolean acceptPlayerControl) {
-        this.path = Constants.computersPath + "/" + compName + "/config";
-        this.compName = compName;
+    public ComputerConfig(Computer computer, boolean acceptPlayerControl) {
+        this.computer = computer;
+        this.path = computer.path + "/config";
+        this.compName = computer.compName;
         this.acceptPlayerControl = acceptPlayerControl;
         DiscUtils.writeFile(this.path, new String[]{"name: " + this.compName, "acceptPlayerControl: " + this.acceptPlayerControl,
                 "terminalFontSize: " + TerminalGUI.fontSize, "fileEditorFontSize: " + FileEditorFrame.fontSize});
     }
 
     public void save() {
+        this.path = computer.path + "/config";
         DiscUtils.writeFile(this.path, new String[]{"name: " + this.compName, "acceptPlayerControl: " + this.acceptPlayerControl,
                 "terminalFontSize: " + TerminalGUI.fontSize, "fileEditorFontSize: " + FileEditorFrame.fontSize});
     }

@@ -6,4 +6,5 @@ public class Constants {
     public static final String defaultFileSystemPath = "/DefaultFilesystem";
     public static final String defaultFileSystemPermsSavePath = "/defaultFilesystemPerms";
     public static final String htmlSpace = "&nbsp;";
+    public static final boolean debugMode = true;
 }

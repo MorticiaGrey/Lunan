@@ -9,9 +9,11 @@ import com.company.Morticia.Computer.Filesystem.L_File;
 import com.company.Morticia.Computer.User.User;
 import com.company.Morticia.Computer.User.UserGroup;
 import com.company.Morticia.Events.Event;
+import com.company.Morticia.Networking.NetworkListener;
 import com.company.Morticia.UI.GUI.FileEditor.FileEditorFrame;
 import com.company.Morticia.UI.GUI.Terminal.TerminalIO;
 import com.company.Morticia.Util.Constants;
+import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaNil;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
@@ -54,10 +56,11 @@ public class LunanLib extends TwoArgFunction {
     @Override
     public LuaValue call(LuaValue modname, LuaValue env) {
         LuaValue library = tableOf();
-        library.set("print", new l_print());
-        library.set("write", new write());
-        library.set("read", new read());
-        library.set("clearTerminal", new clearTerminal());
+        library.set("print", new l_print(computer));
+        library.set("write", new write(computer));
+        library.set("error", new error(this.path, computer));
+        library.set("read", new read(computer));
+        library.set("clearTerminal", new clearTerminal(computer));
         library.set("getCurrPath", new getCurrPath(this.path));
         library.set("getParentFolder", new getParentFolder(this.path));
         library.set("getSelectedPath", new getSelectedPath(this.computer));
@@ -89,11 +92,15 @@ public class LunanLib extends TwoArgFunction {
         library.set("addGroup", new addGroup(this.computer));
         library.set("getCurrUser", new getCurrUser(this.computer));
         library.set("setCurrUser", new setCurrUser(this.computer));
+        library.set("hasRootPerms", new hasRootPerms(this.computer));
         library.set("getFileGroup", new getFileGroup(this.computer));
         library.set("setFileGroup", new setFileGroup(this.computer));
         library.set("openFileEditor", new openFileEditor(this.computer));
         library.set("triggerEvent", new triggerEvent(this.computer));
         library.set("sendPacket", new sendPacket(this.computer));
+        library.set("getIp", new getIp(this.computer));
+        library.set("getAllVisibleIps", new getAllVisibleIps(this.computer));
+        library.set("getCurrNetworkName", new getCurrNetworkName(this.computer));
         library.set("executeScript", new executeScript(this.computer));
         library.set("registerCommand", new registerCommand(this.computer));
         library.set("setColor", new setColor());
@@ -102,10 +109,17 @@ public class LunanLib extends TwoArgFunction {
     }
 
     static class l_print extends OneArgFunction {
-        public l_print() {}
+        public Computer computer;
+
+        public l_print(Computer computer) {
+            this.computer = computer;
+        }
 
         @Override
         public LuaValue call(LuaValue output) {
+            if (!computer.isPlayerComputer) {
+                return LuaNil.NIL;
+            }
             if (output.isboolean()) {
                 TerminalIO.println(output.checkboolean());
             } else if (output.isint()) {
@@ -125,10 +139,17 @@ public class LunanLib extends TwoArgFunction {
     }
 
     static class write extends OneArgFunction {
-        public write() {}
+        Computer computer;
+
+        public write(Computer computer) {
+            this.computer = computer;
+        }
 
         @Override
         public LuaValue call(LuaValue output) {
+            if (!computer.isPlayerComputer) {
+                return LuaNil.NIL;
+            }
             if (output.isboolean()) {
                 TerminalIO.print(output.checkboolean());
             } else if (output.isint()) {
@@ -147,20 +168,56 @@ public class LunanLib extends TwoArgFunction {
         }
     }
 
+    static class error extends OneArgFunction {
+        String path;
+        public Computer computer;
+
+        public error(String path, Computer computer) {
+            this.path = path;
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue errorMessage) {
+            if (!computer.isPlayerComputer) {
+                return LuaNil.NIL;
+            }
+            if (errorMessage.isstring()) {
+                throw new LuaError(errorMessage.checkjstring());
+            } else {
+                throw new LuaError("No provided message");
+            }
+        }
+    }
+
     static class read extends OneArgFunction {
-        public read() {}
+        public Computer computer;
+
+        public read(Computer computer) {
+            this.computer = computer;
+        }
 
         @Override
         public LuaValue call(LuaValue luaValue) {
+            if (!computer.isPlayerComputer) {
+                return LuaNil.NIL;
+            }
             return LuaValue.valueOf(TerminalIO.nextLine(luaValue.checkjstring()));
         }
     }
 
     static class clearTerminal extends ZeroArgFunction {
-        public clearTerminal() {}
+        public Computer computer;
+
+        public clearTerminal(Computer computer) {
+            this.computer = computer;
+        }
 
         @Override
         public LuaValue call() {
+            if (!computer.isPlayerComputer) {
+                return LuaNil.NIL;
+            }
             TerminalIO.clearTerminal();
             return LuaNil.NIL;
         }
@@ -301,7 +358,7 @@ public class LunanLib extends TwoArgFunction {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return LuaNil.NIL;
+            return LuaValue.valueOf(false);
         }
     }
 
@@ -940,6 +997,25 @@ public class LunanLib extends TwoArgFunction {
         }
     }
 
+    static class hasRootPerms extends OneArgFunction {
+        public Computer computer;
+
+        public hasRootPerms(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call(LuaValue userName) {
+            String uName = userName.checkjstring();
+            for (User i : computer.allUsers.members) {
+                if (i.uName.equals(uName)) {
+                    return LuaValue.valueOf(computer.hasRootPerms(i));
+                }
+            }
+            return LuaNil.NIL;
+        }
+    }
+
     // Get group of a file
     static class getFileGroup extends OneArgFunction {
         public Computer computer;
@@ -1005,7 +1081,7 @@ public class LunanLib extends TwoArgFunction {
         }
     }
 
-    static class triggerEvent extends OneArgFunction {
+    static class triggerEvent extends TwoArgFunction {
         public Computer computer;
 
         public triggerEvent(Computer computer) {
@@ -1013,8 +1089,18 @@ public class LunanLib extends TwoArgFunction {
         }
 
         @Override
-        public LuaValue call(LuaValue eventName) {
-            computer.eventTriggered(new Event(eventName.tojstring()));
+        public LuaValue call(LuaValue eventName, LuaValue luaArgs) {
+            List<String> args = new ArrayList<>();
+            LuaTable table;
+            if (luaArgs.istable()) {
+                table = luaArgs.checktable();
+            } else {
+                return LuaNil.NIL;
+            }
+            for (int i = 1; i <= table.length(); i++) {
+                args.add(luaArgs.get(i).checkjstring());
+            }
+            computer.eventTriggered(new Event(eventName.tojstring(), args));
             return LuaNil.NIL;
         }
     }
@@ -1038,6 +1124,49 @@ public class LunanLib extends TwoArgFunction {
                 }
             }
             return LuaValue.valueOf(computer.router.sendPacket(dst.checkjstring(), computer.address, protocol.checkjstring(), buffer));
+        }
+    }
+
+    static class getIp extends ZeroArgFunction {
+        public Computer computer;
+
+        public getIp(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call() {
+            return LuaValue.valueOf(computer.address.address);
+        }
+    }
+
+    static class getAllVisibleIps extends ZeroArgFunction {
+        public Computer computer;
+
+        public getAllVisibleIps(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call() {
+            LuaTable retVal = LuaValue.tableOf();
+            for (NetworkListener i : computer.router.children) {
+                retVal.insert(0, LuaValue.valueOf(i.getAddress().address));
+            }
+            return retVal;
+        }
+    }
+
+    static class getCurrNetworkName extends ZeroArgFunction {
+        public Computer computer;
+
+        public getCurrNetworkName(Computer computer) {
+            this.computer = computer;
+        }
+
+        @Override
+        public LuaValue call() {
+            return LuaValue.valueOf(computer.router.routerName);
         }
     }
 
@@ -1083,16 +1212,11 @@ public class LunanLib extends TwoArgFunction {
 
         @Override
         public LuaValue call(LuaValue scriptPath, LuaValue args) {
-            try {
-                String path = scriptPath.checkjstring();
-                String[] buffer = path.split("/");
-                if (computer.filesystem.getFile(path) != null) {
-                    LuaUtil.run(path, new ProcessedText(buffer[buffer.length - 1] + " " + args.checkjstring()), computer);
-                    return LuaValue.valueOf(true);
-                }
-                return LuaValue.valueOf(false);
-            } catch (Exception e) {
-                e.printStackTrace();
+            String path = scriptPath.checkjstring();
+            String[] buffer = path.split("/");
+            if (computer.filesystem.getFile(path) != null) {
+                LuaUtil.run(path, new ProcessedText(buffer[buffer.length - 1] + " " + args.checkjstring()), computer);
+                return LuaValue.valueOf(true);
             }
             return LuaValue.valueOf(false);
         }

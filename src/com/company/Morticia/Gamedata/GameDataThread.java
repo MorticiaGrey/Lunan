@@ -20,6 +20,7 @@ public class GameDataThread implements Runnable {
     @Override
     public void run() {
         try {
+            Gamedata.threadStarted();
             TerminalIO.setPrefix(Gamedata.playerComputer.generatePrefix());
             while (!thread.isInterrupted()) {
                 Gamedata.tick();
