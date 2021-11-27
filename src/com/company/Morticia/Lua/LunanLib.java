@@ -118,6 +118,7 @@ public class LunanLib extends TwoArgFunction {
         @Override
         public LuaValue call(LuaValue output) {
             if (!computer.isPlayerComputer) {
+                System.out.println(output.checkjstring());
                 return LuaNil.NIL;
             }
             if (output.isboolean()) {
@@ -1117,7 +1118,7 @@ public class LunanLib extends TwoArgFunction {
             List<String> buffer = new ArrayList<>();
             if (data.istable() && data.checktable().length() > 0) {
                 LuaTable table = data.checktable();
-                for (int i = 1; i <= table.length(); i++) { // send ping localhost test test
+                for (int i = 1; i <= table.length(); i++) {
                     if (!table.get(LuaValue.valueOf(i)).isnil()) {
                         buffer.add(table.get(LuaValue.valueOf(i)).checkjstring());
                     }

@@ -1,0 +1,9 @@
+Hello! And welcome to Hood.
+
+This network is owned by us so anything you do won't set off alarms, but if you were worried about that is might not be for you.
+The objective is simple: hack into the only other machine on this network, and delete the data in the /data/flag.txt file. Easy!
+
+We left some notes in your home directory you might want to take a look at, unless of course you'd rather try
+to figure it out all on your own.
+
+Good luck!

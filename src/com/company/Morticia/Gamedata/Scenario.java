@@ -46,6 +46,13 @@ public class Scenario {
         }
     }
 
+    public void writeComputerPaths() {
+        DiscUtils.writeFolder(Constants.computersPath + "/" + scenarioName + "/" + defaultPlayerComputer.compName);
+        for (Computer i : computers) {
+            DiscUtils.writeFolder(Constants.computersPath + "/" + scenarioName + "/" + i.compName);
+        }
+    }
+
     public void save() {
         //defaultPlayerComputer.saveUsers();
         //defaultPlayerComputer.filesystem.saveTo(Constants.computersPath + "/" + scenarioName + "/" + defaultPlayerComputer.compName + "/filesystem", savePath);
@@ -53,6 +60,7 @@ public class Scenario {
         for (Computer i : computers) {
             //i.saveUsers();
             //i.filesystem.saveTo(savePath + "/" + i.compName + "/filesystem", savePath);
+            //DiscUtils.writeFolder(Constants.computersPath + "/" + scenarioName + defaultPlayerComputer.compName);
             i.save();
         }
         DiscUtils.writeFile(savePath + "/mem", new String[]{"playedBefore: " + playedBefore});
@@ -85,7 +93,7 @@ public class Scenario {
     public void load() {
         List<String> data = DiscUtils.readFile(savePath + "/routers");
 
-        if (data == null) {
+        if (data == null || data.isEmpty()) {
             return;
         }
 
@@ -97,10 +105,16 @@ public class Scenario {
             NetworkRegistry.globalRouterRegistry.add(router);
         }
 
+        Router router = NetworkRegistry.getRouter(defaultPlayerComputer.address.routerName);
+        if (router != null) {
+            defaultPlayerComputer.router = router;
+            router.children.add(defaultPlayerComputer);
+        }
         for (Computer i : computers) {
-            Router router = NetworkRegistry.getRouter(i.address.routerName);
+            router = NetworkRegistry.getRouter(i.address.routerName);
             if (router != null) {
                 i.router = router;
+                router.children.add(i);
             }
         }
     }
@@ -131,9 +145,29 @@ public class Scenario {
         }
 
         scenarios.add(scenario1);
+
+        Scenario scenario2 = new Scenario("Induction");
+
+        Router inductionRouter = new Router("HC", null);
+
+        //scenario2.defaultPlayerComputer = new Computer("Acetylene", scenario2, inductionRouter);
+        //scenario2.computers.add(new Computer("Ethanol", scenario2, inductionRouter));
+
+        scenario2.defaultPlayerComputer = new Computer("Acetylene", scenario2, inductionRouter);
+        scenario2.computers.add(new Computer("Ethanol", scenario2, inductionRouter));
+
+        //scenario2.writeComputerPaths();
+
+        if (!scenario1.playedBefore) {
+            scenario1.loadDefault();
+        } else {
+            scenario1.load();
+        }
+
+        scenarios.add(scenario2);
     }
 
     public static Scenario getCurrScenario() {
-        return scenarios.get(0);
+        return scenarios.get(1);
     }
 }

@@ -1,0 +1,9 @@
+Firstly, you'll need to read through the networking related sections of the documentation. There you'll find the tools necessary
+to crack this box.
+
+Now that you're caught up, there is a weakness in the way events are processed on the other machine. It might be possible
+to make it execute commands from another machine.
+
+Make sure you have a script set up to print any events of the name 'print', and have fun!
+
+(pst, I also heard the machine will tell you what network events it responds to if you send it a 'list' packet)

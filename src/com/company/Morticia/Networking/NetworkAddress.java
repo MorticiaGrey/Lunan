@@ -60,6 +60,7 @@ public class NetworkAddress {
             try {
                 contents = DiscUtils.readFile(savePath);
             } catch (Exception e) {
+                DiscUtils.writeFile(savePath);
                 e.printStackTrace();
                 return;
             }
@@ -78,5 +79,10 @@ public class NetworkAddress {
                 }
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return address;
     }
 }
