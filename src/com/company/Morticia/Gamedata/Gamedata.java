@@ -2,6 +2,8 @@ package com.company.Morticia.Gamedata;
 
 import com.company.Morticia.Computer.Computer;
 import com.company.Morticia.UI.GUI.Terminal.TerminalIO;
+import com.company.Morticia.UI.UI;
+import com.company.Morticia.Util.Constants;
 
 import java.util.List;
 
@@ -11,10 +13,18 @@ public class Gamedata {
 
     public static void threadStarted() {
         Scenario.initScenarios();
-        playerComputer = Scenario.getCurrScenario().defaultPlayerComputer;
+        Scenario currScenario = null;
+        while (currScenario == null) {
+            currScenario = Scenario.getCurrScenario();
+        }
+        UI.mainFrame.show();
+        playerComputer = currScenario.defaultPlayerComputer;
         playerComputer.isPlayerComputer = true;
-        computers = Scenario.getCurrScenario().computers;
-        Scenario.getCurrScenario().load();
+        computers = currScenario.computers;
+        currScenario.load();
+        if (!Constants.debugMode) {
+            currScenario.playedBefore = true;
+        }
     }
 
     public static void tick() {

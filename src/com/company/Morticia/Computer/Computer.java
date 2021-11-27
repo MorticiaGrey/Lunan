@@ -58,6 +58,7 @@ public class Computer implements NetworkListener, LunanEventListener {
         } else {
             this.path = Constants.computersPath + "/" + scenario.scenarioName + "/" + compName;
         }
+        DiscUtils.writeFolder(Constants.computersPath + "/" + scenario.scenarioName + "/" + compName);
         this.compName = compName;
         this.input = new ArrayList<>();
         this.commands = new ArrayList<>();
@@ -151,6 +152,7 @@ public class Computer implements NetworkListener, LunanEventListener {
 
     // Saves users and groups to text file
     public void saveUsers() {
+        DiscUtils.writeFolder(this.path);
         List<String> content = new ArrayList<>();
 
         for (UserGroup i : groups) {

@@ -1,8 +1,10 @@
 local length = tableLength(args)
-if length >= 3 then
+if length >= 2 then
     local data = {}
-    for i = 3, length, 1 do
-        data[#data+1] = args[i]
+    if length >= 3 then
+        for i = 3, length, 1 do
+            data[#data+1] = args[i]
+        end
     end
     if not lunan.sendPacket(args[1], args[2], data) then
         print(args[1] .. ": no such address")

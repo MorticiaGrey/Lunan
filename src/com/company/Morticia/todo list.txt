@@ -27,7 +27,7 @@
  - Write the default networking events
  - Rename file/directory command (Done)
  - Function to wrap text in color lua (Done)
- - Advanced terminal stuff like piping input (All this terminal stuff will be the next update, for now I just want to finish)
+ - Advanced terminal stuff like piping input and variables (All this terminal stuff will be the next update, for now I just want to finish)
  - (Very) Basic syntax highlighting for the text editor, make it toggleable (maybe undoable)
  - Line numbering in text editor (Done)
  - Fucking scroll bar in text editor you moron (Done)
@@ -42,6 +42,7 @@
  - Commands to get all ips on network/ip address of this computer (Done)
  - Output stream/otherwise make non current computers not print to console (Still add input stream eventually but for now works)
  - Find way to allow puzzles to be made (Done)
+ - Puzzle selection (Done)
  - Make the puzzles
  - Puzzle idea: you can log in as client and make files but not execute them. There's a folder you have access to that
  you aren't supposed to with execution perms for all. From here you can trigger event hinted at that executes

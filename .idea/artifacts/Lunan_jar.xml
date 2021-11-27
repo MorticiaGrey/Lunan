@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Lunan:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Lunan_jar</output-path>
+    <root id="archive" name="Lunan.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="Lunan" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../LuaEmbedding/luaj/luaj-jse-3.0.2.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

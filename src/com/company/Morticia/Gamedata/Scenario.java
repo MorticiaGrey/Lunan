@@ -3,9 +3,14 @@ package com.company.Morticia.Gamedata;
 import com.company.Morticia.Computer.Computer;
 import com.company.Morticia.Networking.NetworkRegistry;
 import com.company.Morticia.Networking.Router;
+import com.company.Morticia.UI.GUI.MainFrame;
+import com.company.Morticia.UI.GUI.Terminal.TerminalGUI;
 import com.company.Morticia.Util.Constants;
 import com.company.Morticia.Util.DiscUtils.DiscUtils;
 
+import javax.swing.*;
+import javax.swing.plaf.ColorUIResource;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -144,7 +149,7 @@ public class Scenario {
             scenario1.load();
         }
 
-        scenarios.add(scenario1);
+        //scenarios.add(scenario1);
 
         Scenario scenario2 = new Scenario("Induction");
 
@@ -158,7 +163,7 @@ public class Scenario {
 
         //scenario2.writeComputerPaths();
 
-        if (!scenario1.playedBefore) {
+        if (!scenario2.playedBefore) {
             scenario1.loadDefault();
         } else {
             scenario1.load();
@@ -168,6 +173,33 @@ public class Scenario {
     }
 
     public static Scenario getCurrScenario() {
-        return scenarios.get(1);
+        if (Constants.debugMode) {
+            return scenarios.get(scenarios.size() - 1);
+        }
+        List<Object> possibilites = new ArrayList<>();
+        possibilites.add("");
+
+        int num = 1;
+        for (Scenario i : scenarios) {
+            possibilites.add(num + ": " + i.scenarioName);
+            num++;
+        }
+
+        Icon icon = new ImageIcon();
+        String input = (String) JOptionPane.showInputDialog(
+                null,
+                "Please select a level",
+                "Level Selection",
+                JOptionPane.PLAIN_MESSAGE,
+                icon,
+                possibilites.toArray(),
+                "");
+
+        for (Scenario i : scenarios) {
+            if (i.scenarioName.equals(input)) {
+                return i;
+            }
+        }
+        return null;
     }
 }

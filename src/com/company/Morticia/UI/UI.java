@@ -11,7 +11,7 @@ public class UI {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                mainFrame.show();
+                //mainFrame.show();
             }
         });
     }
