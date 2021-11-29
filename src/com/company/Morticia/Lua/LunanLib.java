@@ -119,22 +119,28 @@ public class LunanLib extends TwoArgFunction {
         public LuaValue call(LuaValue output) {
             if (!computer.isPlayerComputer) {
                 System.out.println(output.checkjstring());
+                computer.eventTriggered(new Event("output", Arrays.asList(output.checkjstring().split(" "))));
                 return LuaNil.NIL;
             }
             if (output.isboolean()) {
                 TerminalIO.println(output.checkboolean());
+                computer.eventTriggered(new Event("output", Arrays.asList((Boolean.toString(output.checkboolean()).split(" ")))));
             } else if (output.isint()) {
                 TerminalIO.println(output.checkint());
+                computer.eventTriggered(new Event("output", Arrays.asList((Integer.toString(output.checkint())).split(" "))));
             } else if (output.istable()) {
                 LuaTable table = (LuaTable) output;
                 StringBuilder buffer = new StringBuilder();
                 for (int i = 0; i < table.length(); i++) {
                     buffer.append(table.get(i));
                 }
+                computer.eventTriggered(new Event("output", Arrays.asList(buffer.toString().split(" "))));
                 TerminalIO.println(buffer.toString());
             } else if (output.isstring()){
+                computer.eventTriggered(new Event("output", Arrays.asList(output.checkjstring().split(" "))));
                 TerminalIO.println(output.checkjstring());
             }
+            computer.eventTriggered(new Event("output", Arrays.asList(output.checkjstring().split(" "))));
             return LuaNil.NIL;
         }
     }
@@ -149,22 +155,29 @@ public class LunanLib extends TwoArgFunction {
         @Override
         public LuaValue call(LuaValue output) {
             if (!computer.isPlayerComputer) {
+                System.out.print(output.checkjstring());
+                computer.eventTriggered(new Event("output", Arrays.asList(output.checkjstring().split(" "))));
                 return LuaNil.NIL;
             }
             if (output.isboolean()) {
                 TerminalIO.print(output.checkboolean());
+                computer.eventTriggered(new Event("output", Arrays.asList((Boolean.toString(output.checkboolean()).split(" ")))));
             } else if (output.isint()) {
                 TerminalIO.print(output.checkint());
+                computer.eventTriggered(new Event("output", Arrays.asList((Integer.toString(output.checkint())).split(" "))));
             } else if (output.istable()) {
                 LuaTable table = (LuaTable) output;
                 StringBuilder buffer = new StringBuilder();
                 for (int i = 0; i < table.length(); i++) {
                     buffer.append(table.get(i));
                 }
+                computer.eventTriggered(new Event("output", Arrays.asList(buffer.toString().split(" "))));
                 TerminalIO.print(buffer.toString());
             } else if (output.isstring()){
+                computer.eventTriggered(new Event("output", Arrays.asList(output.checkjstring().split(" "))));
                 TerminalIO.print(output.checkjstring());
             }
+            computer.eventTriggered(new Event("output", Arrays.asList(output.checkjstring().split(" "))));
             return LuaNil.NIL;
         }
     }
@@ -181,11 +194,14 @@ public class LunanLib extends TwoArgFunction {
         @Override
         public LuaValue call(LuaValue errorMessage) {
             if (!computer.isPlayerComputer) {
+                computer.eventTriggered(new Event("output", Arrays.asList(errorMessage.checkjstring().split(" "))));
                 return LuaNil.NIL;
             }
-            if (errorMessage.isstring()) {
+            if (errorMessage.isstring() || errorMessage.checkjstring().isEmpty()) {
+                computer.eventTriggered(new Event("output", List.of("")));
                 throw new LuaError(errorMessage.checkjstring());
             } else {
+                computer.eventTriggered(new Event("output", Arrays.asList(errorMessage.checkjstring().split(" "))));
                 throw new LuaError("No provided message");
             }
         }

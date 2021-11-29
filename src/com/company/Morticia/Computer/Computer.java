@@ -99,6 +99,10 @@ public class Computer implements NetworkListener, LunanEventListener {
     }
 
     public void processCommand(ProcessedText in) {
+        List<String> eventArgs = new ArrayList<>();
+        eventArgs.add(in.command);
+        eventArgs.addAll(in.args);
+        eventArgs.addAll(in.flags);
         if (in.command.startsWith("./")) {
             in.args.add(0, in.command.replaceFirst("./", ""));
             in.command = "execute";
@@ -109,6 +113,7 @@ public class Computer implements NetworkListener, LunanEventListener {
                 currUser.sudoEnabled = true;
             } else {
                 TerminalIO.println("incorrect password");
+                eventTriggered(new Event("command", eventArgs));
                 return;
             }
         }
@@ -116,9 +121,11 @@ public class Computer implements NetworkListener, LunanEventListener {
             if (i.name.equals(in.command) && i.file.canExecute(this.currUser)) {
                 i.execute(this, in);
                 currUser.sudoEnabled = false;
+                eventTriggered(new Event("command", eventArgs));
                 return;
             }
         }
+        eventTriggered(new Event("command", eventArgs));
         currUser.sudoEnabled = false;
         TerminalIO.println(in.command + ": command not found");
     }
