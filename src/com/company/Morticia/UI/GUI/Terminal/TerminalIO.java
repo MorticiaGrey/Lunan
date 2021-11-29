@@ -17,8 +17,9 @@ public class TerminalIO {
      * @param arg Thing to be printed to terminal
      */
     public static synchronized void println(Object arg) {
-        String currText = ((JLabel) TerminalGUI.centerPanel.getComponent(cmpn)).getText();
-        ((JLabel) TerminalGUI.centerPanel.getComponent(cmpn)).setText(currText + "<br>" + arg.toString());
+        JLabel label = ((JLabel) TerminalGUI.centerPanel.getComponent(cmpn));
+        String currText = label.getText();
+        label.setText(currText + "<br>" + ((TextWrappingJLabel) label).wrapText(arg.toString()));
         TerminalGUI.scrollToBottom();
     }
 
@@ -28,8 +29,9 @@ public class TerminalIO {
      * @param arg Thing to be printed to terminal
      */
     public static synchronized void print(Object arg) {
-        String currText = ((JLabel) TerminalGUI.centerPanel.getComponent(cmpn)).getText();
-        ((JLabel) TerminalGUI.centerPanel.getComponent(cmpn)).setText(currText + arg.toString());
+        JLabel label = ((JLabel) TerminalGUI.centerPanel.getComponent(cmpn));
+        String currText = label.getText();
+        label.setText(currText + ((TextWrappingJLabel) label).wrapText(arg.toString()));
         TerminalGUI.scrollToBottom();
     }
 

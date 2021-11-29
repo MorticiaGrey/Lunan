@@ -155,13 +155,8 @@ public class Scenario {
 
         Router inductionRouter = new Router("HC", null);
 
-        //scenario2.defaultPlayerComputer = new Computer("Acetylene", scenario2, inductionRouter);
-        //scenario2.computers.add(new Computer("Ethanol", scenario2, inductionRouter));
-
         scenario2.defaultPlayerComputer = new Computer("Acetylene", scenario2, inductionRouter);
         scenario2.computers.add(new Computer("Ethanol", scenario2, inductionRouter));
-
-        //scenario2.writeComputerPaths();
 
         if (!scenario2.playedBefore) {
             scenario1.loadDefault();
@@ -170,6 +165,33 @@ public class Scenario {
         }
 
         scenarios.add(scenario2);
+
+        Scenario trialScenario = new Scenario("Trial");
+
+        // Player's router
+        Router HN = new Router("HN", null);
+        // Router of target network
+        Router businessRouter = new Router("WesternConstructionHoldingsNetwork", null);
+
+        trialScenario.defaultPlayerComputer = new Computer("Box", trialScenario, HN);
+
+        // Proxy
+        trialScenario.computers.add(new Computer("proxy", trialScenario, businessRouter));
+
+        // Servers
+        trialScenario.computers.add(new Computer("Server1", trialScenario, businessRouter));
+        trialScenario.computers.add(new Computer("Server2", trialScenario, businessRouter));
+
+        // Boss computer
+        trialScenario.computers.add(new Computer("GsFfS1", trialScenario, businessRouter));
+
+        // Worker computers
+        trialScenario.computers.add(new Computer("Emp1", trialScenario, businessRouter));
+        trialScenario.computers.add(new Computer("Emp2", trialScenario, businessRouter));
+        trialScenario.computers.add(new Computer("Emp3", trialScenario, businessRouter));
+        trialScenario.computers.add(new Computer("Emp4", trialScenario, businessRouter));
+
+        scenarios.add(trialScenario);
     }
 
     public static Scenario getCurrScenario() {

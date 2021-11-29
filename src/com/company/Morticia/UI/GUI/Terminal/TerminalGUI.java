@@ -8,6 +8,10 @@ import javax.swing.border.Border;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.Document;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -48,22 +52,36 @@ public class TerminalGUI implements MouseWheelListener, KeyListener {
     public static void start() {
         JFrame frame = UI.mainFrame.frame;
 
-        centerPanel.setLayout(new BorderLayout());
+        centerPanel.setLayout(new GridBagLayout());
         userInputPanel.setLayout(new BorderLayout());
+
+        centerPanel.setAlignmentX(0.0F);
+        userInputPanel.setAlignmentX(0.0F);
+
+        centerPanel.setAlignmentY(0.0F);
+        userInputPanel.setAlignmentY(0.0F);
 
         centerPanel.setBackground(Color.BLACK);
         userInputPanel.setBackground(Color.BLACK);
 
-        JLabel outputDisplay = new JLabel("<html>");
-        outputDisplay.setHorizontalAlignment(SwingConstants.LEFT);
-        outputDisplay.setVerticalAlignment(SwingConstants.BOTTOM);
-        outputDisplay.setBackground(Color.BLACK);
+        //centerPanel.setPreferredSize(new Dimension(1, 1));
+        //userInputPanel.setPreferredSize(new Dimension(1, 1));
+
+        TextWrappingJLabel outputDisplay = new TextWrappingJLabel("<html>");
+        //outputDisplay.setHorizontalAlignment(SwingConstants.LEFT);
+        //outputDisplay.setVerticalAlignment(SwingConstants.BOTTOM);
+        outputDisplay.setBackground(Color.WHITE);
         outputDisplay.setForeground(Color.WHITE);
+        //outputDisplay.setAlignmentX(0.0F);
+        //outputDisplay.setPreferredSize(new Dimension(1, fontSize));
 
         scrollPane.addMouseWheelListener(new TerminalGUI());
 
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+
         scrollPane.setBackground(Color.BLACK);
-        scrollPane.setForeground(Color.white);
+        scrollPane.setForeground(Color.WHITE);
 
         vertical = scrollPane.getVerticalScrollBar();
         horizontal = scrollPane.getHorizontalScrollBar();
@@ -74,7 +92,29 @@ public class TerminalGUI implements MouseWheelListener, KeyListener {
         vertical.setPreferredSize(new Dimension(0, 0));
         horizontal.setPreferredSize(new Dimension(0, 0));
 
-        centerPanel.add(outputDisplay, BorderLayout.CENTER);
+        GridBagConstraints c1 = new GridBagConstraints();
+        c1.gridx = 0;
+        c1.gridy = 0;
+        c1.gridwidth = GridBagConstraints.REMAINDER;
+        c1.fill = GridBagConstraints.HORIZONTAL;
+        c1.anchor = GridBagConstraints.FIRST_LINE_START;
+        c1.weightx = 1.0F;
+        //c1.weighty = 1.0F;
+
+        GridBagConstraints c2 = new GridBagConstraints();
+        c2.gridx = 0;
+        c2.gridy = 1;
+        c2.gridwidth = GridBagConstraints.REMAINDER;
+        c2.fill = GridBagConstraints.HORIZONTAL;
+        c2.anchor = GridBagConstraints.FIRST_LINE_START;
+        c2.weightx = 1.0F;
+        c2.weighty = 1.0F;
+
+        centerPanel.add(outputDisplay, c1);
+        centerPanel.add(userInputPanel, c2);
+
+        //boxPanel.add(centerPanel);
+        //boxPanel.add(userInputPanel);
 
         JTextField inputField = new JTextField() {
             @Override public void setBorder(Border border) {
@@ -123,11 +163,11 @@ public class TerminalGUI implements MouseWheelListener, KeyListener {
 
         updateFont();
 
-        UI.mainFrame.removeAllComponents();
-        //frame.add(centerPanel, BorderLayout.CENTER);
-        scrollPane.getViewport().add(centerPanel);
+        //UI.mainFrame.removeAllComponents();
+        //frame.add(centerPanel, BorderLayout.NORTH);
+        scrollPane.getViewport().add(centerPanel, BorderLayout.NORTH);
         frame.add(scrollPane);
-        frame.add(userInputPanel, BorderLayout.SOUTH);
+        //frame.add(userInputPanel, BorderLayout.SOUTH);
         SwingUtilities.updateComponentTreeUI(frame);
     }
 

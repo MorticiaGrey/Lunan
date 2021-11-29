@@ -132,9 +132,8 @@ public class Computer implements NetworkListener, LunanEventListener {
     }
 
     public String generatePrefix() {
-        return TerminalIO.getColor("#00E268") + "[" + this.currUser.uName + "@" + this.compName + " "
-                + TerminalIO.getColor("#FFFFFF") + this.currFolder.cName + TerminalIO.colorReset
-                + TerminalIO.getColor("#00E268") + "]$&nbsp;" + TerminalIO.colorReset; // &nbsp; forces html to add whitespace, so it won't just ignore the space on the end of the input
+        return TerminalIO.wrapInColor("[" + currUser.uName + "@" + compName + " ", "#00E268") +
+                TerminalIO.wrapInColor(currFolder.cName, "#FFFFFF") + TerminalIO.wrapInColor("]$&nbsp;", "#00E268");// &nbsp; forces html to add whitespace, so it won't just ignore the space on the end of the input
     }
 
     public boolean hasRootPerms(User user) {
